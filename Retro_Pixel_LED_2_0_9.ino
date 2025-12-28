@@ -819,30 +819,44 @@ void handleFileManager() {
         return;
     }
 
-    String content = F("<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>RetroPixel LED - Archivos SD</title>");
-    content += F("<style>body{font-family:Arial,sans-serif;background:#2c3e50;color:#ecf0f1;margin:0;padding:20px}h1{color:#f39c12}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}.container{max-width:800px;margin:auto}.menu{margin-bottom:20px}.menu button,.menu a,.file-item button{background:#34495e;color:white;border:none;padding:10px 15px;cursor:pointer;border-radius:5px;text-decoration:none;display:inline-block;margin-right:5px}.menu button:hover,.menu a:hover,.file-item button:hover{background:#2c3e50}.file-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #34495e}.file-item:nth-child(even){background:#243647}.file-item a{flex-grow:1;margin-right:10px}.dir{color:#f1c40f}.file{color:#bdc3c7}.current-path{background:#1abc9c;padding:5px 10px;border-radius:5px;display:block;margin-bottom:15px}.upload-form,.dir-form{margin-top:20px;padding:15px;border:1px solid #3498db;border-radius:5px}.upload-form input[type=file],.dir-form input[type=text]{padding:10px;border:1px solid #34495e;border-radius:5px;margin-right:10px;background:#2c3e50;color:#ecf0f1}.dir-form input[type=submit]{margin-top:10px}</style></head><body><div class='container'>");
-    
+    server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+    server.send(200, "text/html", "");
+    //String content = F("<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>RetroPixel LED - Archivos SD</title>");
+    //content += F("<style>body{font-family:Arial,sans-serif;background:#2c3e50;color:#ecf0f1;margin:0;padding:20px}h1{color:#f39c12}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}.container{max-width:800px;margin:auto}.menu{margin-bottom:20px}.menu button,.menu a,.file-item button{background:#34495e;color:white;border:none;padding:10px 15px;cursor:pointer;border-radius:5px;text-decoration:none;display:inline-block;margin-right:5px}.menu button:hover,.menu a:hover,.file-item button:hover{background:#2c3e50}.file-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #34495e}.file-item:nth-child(even){background:#243647}.file-item a{flex-grow:1;margin-right:10px}.dir{color:#f1c40f}.file{color:#bdc3c7}.current-path{background:#1abc9c;padding:5px 10px;border-radius:5px;display:block;margin-bottom:15px}.upload-form,.dir-form{margin-top:20px;padding:15px;border:1px solid #3498db;border-radius:5px}.upload-form input[type=file],.dir-form input[type=text]{padding:10px;border:1px solid #34495e;border-radius:5px;margin-right:10px;background:#2c3e50;color:#ecf0f1}.dir-form input[type=submit]{margin-top:10px}</style></head><body><div class='container'>");
+    server.sendContent(F("<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>RetroPixel LED - Archivos SD (update 27/11/2025) </title>"));
+    server.sendContent(F("<style>body{font-family:Arial,sans-serif;background:#2c3e50;color:#ecf0f1;margin:0;padding:20px}h1{color:#f39c12}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}.container{max-width:800px;margin:auto}.menu{margin-bottom:20px}.menu button,.menu a,.file-item button{background:#34495e;color:white;border:none;padding:10px 15px;cursor:pointer;border-radius:5px;text-decoration:none;display:inline-block;margin-right:5px}.menu button:hover,.menu a:hover,.file-item button:hover{background:#2c3e50}.file-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #34495e}.file-item:nth-child(even){background:#243647}.file-item a{flex-grow:1;margin-right:10px}.dir{color:#f1c40f}.file{color:#bdc3c7}.current-path{background:#1abc9c;padding:5px 10px;border-radius:5px;display:block;margin-bottom:15px}.upload-form,.dir-form{margin-top:20px;padding:15px;border:1px solid #3498db;border-radius:5px}.upload-form input[type=file],.dir-form input[type=text]{padding:10px;border:1px solid #34495e;border-radius:5px;margin-right:10px;background:#2c3e50;color:#ecf0f1}.dir-form input[type=submit]{margin-top:10px}</style></head><body><div class='container'>"));
+    //server.sendContent(F(""));
+        
     // --- ENCABEZADO Y NAVEGACIÓN ---
-    content += F("<h1><a href='/'>🏠 RetroPixel LED</a></h1><h2>📁 Archivos SD</h2>");
+    //content += F("<h1><a href='/'>🏠 RetroPixel LED</a></h1><h2>📁 Archivos SD</h2>");
+    server.sendContent(F("<h1><a href='/'>🏠 RetroPixel LED</a></h1><h2>📁 Archivos SD (update 27/11/2025)</h2>"));
     
     // Mostrar la ruta actual
-    content += F("<div class='current-path'>Ruta Actual: <strong>");
-    content += currentPath;
-    content += F("</strong></div>");
+    //content += F("<div class='current-path'>Ruta Actual: <strong>");
+    //content += currentPath;
+    //content += F("</strong></div>");
+    server.sendContent(F("<div class='current-path'>Ruta Actual: <strong>"));
+    server.sendContent(currentPath);
+    server.sendContent(F("</strong></div>"));
+
 
     // Botón de Volver
     if (currentPath != "/") {
         // Calcular la ruta: quita el último segmento y la barra final
         String parentPath = currentPath.substring(0, currentPath.lastIndexOf('/', currentPath.length() - 2) + 1);
         
-        content += F("<div class='menu'><a href='/file_manager?path=");
-        content += parentPath;
-        content += F("'>⬅️ Subir Directorio</a></div>");
+        //content += F("<div class='menu'><a href='/file_manager?path=");
+        //content += parentPath;
+        //content += F("'>⬅️ Subir Directorio</a></div>");
+        server.sendContent(F("<div class='menu'><a href='/file_manager?path="));
+        server.sendContent(parentPath);
+        server.sendContent(F("'>⬅️ Subir Directorio</a></div>"));
     }
 
     // --- LISTADO DE ARCHIVOS ---
-    content += F("<h3>Contenido del Directorio:</h3>");
-    
+    //content += F("<h3>Contenido del Directorio:</h3>");
+    server.sendContent(F("<h3>Contenido del Directorio:</h3>"));
+
     File file = root.openNextFile();
     while(file){
         String filename = file.name();
@@ -851,36 +865,55 @@ void handleFileManager() {
         filename = filename.substring(lastSlash + 1); 
         
         if (filename.length() > 0 && filename != ".") { // Evitar "." y nombres vacíos
-            content += F("<div class='file-item'>");
+            //content += F("<div class='file-item'>");
+            server.sendContent(F("<div class='file-item'>"));
             
             if (file.isDirectory()){
                 // Enlace a la carpeta
-                content += F("<a class='dir' href='/file_manager?path=");
-                content += currentPath;
-                content += filename;
-                content += F("/'>");
-                content += F("📂 ");
-                content += filename;
-                content += F("</a>");
+                //content += F("<a class='dir' href='/file_manager?path=");
+                //content += currentPath;
+                //content += filename;
+                //content += F("/'>");
+                //content += F("📂 ");
+                //content += filename;
+                //content += F("</a>");
+                server.sendContent(F("<a class='dir' href='/file_manager?path="));
+                server.sendContent(currentPath);
+                server.sendContent(filename);
+                server.sendContent(F("/'>"));
+                server.sendContent(F("📂 "));
+                server.sendContent(filename);
+                server.sendContent(F("</a>"));
 
                 // Botón Borrar Directorio
-                content += F("<button onclick='confirmDelete(\"");
-                content += filename;
-                content += F("\", \"dir\")'>🗑️ Borrar</button>");
+                //content += F("<button onclick='confirmDelete(\"");
+                //content += filename;
+                //content += F("\", \"dir\")'>🗑️ Borrar</button>");
+                server.sendContent(F("<button onclick='confirmDelete(\""));
+                server.sendContent(filename);
+                server.sendContent(F("\", \"dir\")'>🗑️ Borrar</button>"));
                 
             } else {
                 // Nombre del archivo
-                content += F("<span class='file'>");
-                content += F("📄 ");
-                content += filename;
-                content += F("</span>");
-                
+                //content += F("<span class='file'>");
+                //content += F("📄 ");
+                //content += filename;
+                //content += F("</span>");
+                server.sendContent(F("<span class='file'>"));
+                server.sendContent(F("📄 "));
+                server.sendContent(filename);
+                server.sendContent(F("</span>"));
+
                 // Botón Borrar Archivo
-                content += F("<button onclick='confirmDelete(\"");
-                content += filename;
-                content += F("\", \"file\")'>🗑️ Borrar</button>");
+                //content += F("<button onclick='confirmDelete(\"");
+                //content += filename;
+                //content += F("\", \"file\")'>🗑️ Borrar</button>");
+                server.sendContent(F("<button onclick='confirmDelete(\""));
+                server.sendContent(filename);
+                server.sendContent(F("\", \"file\")'>🗑️ Borrar</button>"));
             }
-            content += F("</div>");
+            //content += F("</div>");
+            server.sendContent(F("</div>"));
         }
         file.close(); // Liberar el recurso del archivo actual
         file = root.openNextFile(); // Pasar al siguiente archivo
@@ -888,20 +921,29 @@ void handleFileManager() {
     root.close(); // Cerrar el directorio raíz
 
     // --- FORMULARIO CREAR CARPETA ---
-    content += F("<div class='dir-form'><h3>Crear Nueva Carpeta</h3>");
-    content += F("<form action='/create_dir' method='GET'><input type='text' name='name' placeholder='Nombre de la carpeta' required><input type='submit' value='Crear Carpeta'></form></div>");
-    
+    //content += F("<div class='dir-form'><h3>Crear Nueva Carpeta</h3>");
+    //content += F("<form action='/create_dir' method='GET'><input type='text' name='name' placeholder='Nombre de la carpeta' required><input type='submit' value='Crear Carpeta'></form></div>");
+    server.sendContent(F("<div class='dir-form'><h3>Crear Nueva Carpeta</h3>"));
+    server.sendContent(F("<form action='/create_dir' method='GET'><input type='text' name='name' placeholder='Nombre de la carpeta' required><input type='submit' value='Crear Carpeta'></form></div>"));
+
+
     // --- FORMULARIO SUBIR ARCHIVO ---
-    content += F("<div class='upload-form'><h3>Subir Archivo (al directorio actual)</h3>");
-    content += F("<form method='POST' action='/upload' enctype='multipart/form-data'>");
-    content += F("<input type='file' name='data' multiple required><br>");
-    content += F("<input type='submit' value='Subir Archivo'></form></div>");
+    //content += F("<div class='upload-form'><h3>Subir Archivo (al directorio actual)</h3>");
+    //content += F("<form method='POST' action='/upload' enctype='multipart/form-data'>");
+    //content += F("<input type='file' name='data' multiple required><br>");
+    //content += F("<input type='submit' value='Subir Archivo'></form></div>");
+    server.sendContent(F("<div class='upload-form'><h3>Subir Archivo (al directorio actual)</h3>"));
+    server.sendContent(F("<form method='POST' action='/upload' enctype='multipart/form-data'>"));
+    server.sendContent(F("<input type='file' name='data' multiple required><br>"));
+    server.sendContent(F("<input type='submit' value='Subir Archivo'></form></div>"));
 
     // --- SCRIPT DE BORRADO Y CIERRE ---
-    content += F("<script>function confirmDelete(name, type) { if (confirm('¿Estás seguro de que quieres borrar ' + (type === 'dir' ? 'la carpeta' : 'el archivo') + ' \"' + name + '\"?')) { window.location.href = '/delete?name=' + name + '&type=' + type; } }</script>");
-    content += F("</div></body></html>");
+    //content += F("<script>function confirmDelete(name, type) { if (confirm('¿Estás seguro de que quieres borrar ' + (type === 'dir' ? 'la carpeta' : 'el archivo') + ' \"' + name + '\"?')) { window.location.href = '/delete?name=' + name + '&type=' + type; } }</script>");
+    //content += F("</div></body></html>");
+    server.sendContent(F("<script>function confirmDelete(name, type) { if (confirm('¿Estás seguro de que quieres borrar ' + (type === 'dir' ? 'la carpeta' : 'el archivo') + ' \"' + name + '\"?')) { window.location.href = '/delete?name=' + name + '&type=' + type; } }</script>"));
+    server.sendContent(F("</div></body></html>"));
 
-    server.send(200, "text/html", content);
+    //server.send(200, "text/html", content);
 }
 
 String fileManagerPage() {
@@ -1141,7 +1183,7 @@ void scanFolders(String basePath) {
     }
     root.close();
     
-    // Ordenar la lista para mostrarla alfabéticamente en la web
+        // Ordenar la lista para mostrarla alfabéticamente en la web
     if (allFolders.size() > 0) {
         std::sort(allFolders.begin(), allFolders.end());
     }
@@ -1202,13 +1244,44 @@ void saveGifCache() {
 }
 
 // Función recursiva que escanea una ruta en busca de GIFs
-void scanGifDirectory(String path) {
+void scanGifDirectory(const String& path) {   // Pasamos el parametro por referencia para no perder memoria
+    Serial.println("scanGifDirectory reajustado 28/12/2025");
     File root = SD.open(path);
-    if (!root) {
+    if (!root || !root.isDirectory()) {  // Verificamos que ademas de existir la ruta esta sea un directorio
         Serial.printf("Error al abrir directorio: %s\n", path.c_str());
         return;
     }
+    File entry;
+    int cont=0;
     
+    while (true) {
+        entry = root.openNextFile();
+        if (!entry) break;
+
+        if (!entry.isDirectory()) {
+            // Si es un directorio, lo ignoramos para la lista plana de archivos
+            // Si en el futuro quiere escanear recursivamente, esta es la línea a cambiar.
+
+            String fileName = entry.name();
+            if (fileName.endsWith(".gif") || fileName.endsWith(".GIF")) {
+
+                String fullPath;
+                if (path == "/") {
+                    fullPath = "/" + fileName;
+                } else {
+                    fullPath = path + "/" + fileName;
+                }
+                archivosGIF.push_back(fullPath);
+                cont++;
+                Serial.printf("[%d] - %s\n", cont, fullPath.c_str());
+
+            }
+        }
+        entry.close();  // 🔴 IMPRESCINDIBLE
+    }
+    Serial.println("fin scanGifDirectory ........");
+/*
+    // Codigo anterior con gestión de memoria incorrecta
     File entry = root.openNextFile();
     while(entry){
         if(entry.isDirectory()){
@@ -1229,6 +1302,7 @@ void scanGifDirectory(String path) {
         }
         entry = root.openNextFile();
     }
+*/
     root.close();
 }
 
