@@ -17,8 +17,8 @@
 // ====================================================================
 //                          CONSTANTES & FIRMWARE
 // ====================================================================
-#define FIRMWARE_VERSION "2.0.9.MEMOPT_PAG_1.13" // MODIFICADO: Nueva versión del firmware
-#define FIRMWARE_DATE "31_12_2025_18_09" // Fecha de la version
+#define FIRMWARE_VERSION "2.0.9.MEM_OPT_1.4" // MODIFICADO: Nueva versión del firmware
+#define FIRMWARE_DATE "29_12_2025_17_29" // Fecha de la version
 #define PREF_NAMESPACE "pixel_config"
 #define DEVICE_NAME_DEFAULT "RetroPixel-Default"
 #define TZ_STRING_SPAIN "CET-1CEST,M3.5.0,M10.5.0/3" // Cadena TZ por defecto segura
@@ -26,7 +26,6 @@
 #define GIF_CACHE_FILE "/gif_cache.txt" // Archivo para guardar el índice de GIFs
 #define GIF_CACHE_SIG "/gif_cache.sig" // Nuevo archivo de firma
 #define M5STACK_SD SD
-
 
 // --- NUEVA DEFINICIÓN DE PINES HUB75 (según tu propuesta) ---
 // Estos pines usan una combinación segura fuera del bus SD/Flash.
@@ -79,8 +78,6 @@ size_t numGifs = 0;             // número de elementos en el array gifOffsets
 const size_t EXTRAOFFSETS = 100; // Margen de casillas en el array de offsets para las nuevas subidas de archivo
 size_t extraOffsetsUsed=0;      // offsets extras utilizados en las nuevas subidas de archivo 
                                 // ** evita reasignar memoria por la subida de 1 a 100 archivos, mejora fragmentacion memoria ESP
-
-const uint16_t ITEMS_PER_PAGE = 20; // Maximo numero de gif por pagina mostrados por el gestor web 
 
 // Variables de modos
 int xPosMarquesina = 0;
@@ -164,15 +161,7 @@ void scanFolders();
 // ====================================================================
 //       FUNCIONES AÑADIDAS PARA OPTIMIZACIÓN EN USO MEMORIA
 // ====================================================================
-// Log del estado del heap
-void logHeap(const char* tag) {
-    Serial.printf("[%s] Heap libre: %u | Heap mínimo: %u | PSRAM: %u\n",
-        tag,
-        ESP.getFreeHeap(),
-        ESP.getMinFreeHeap(),
-        ESP.getFreePsram()
-    );
-}
+
 
 // Cuenta el numero de lineas de un fichero
 uint32_t countLinesInFile() {
@@ -253,11 +242,6 @@ bool initGifOffsets(){
         numGifs=0;              // Inicializamos los gif gastados
         extraOffsetsUsed=0;     // Inicializamos los extraoffsets usados
         gifOffsets = nullptr;
-        Serial.println("initGifOffsets inicializado");
-    }
-    else 
-    {
-        Serial.println("initGifOffsets no inicializado");
     }
     Serial.println("initGifOffsets ejecutado");
 }
@@ -945,14 +929,7 @@ void handleFileManager() {
     
     // 1. OBTENER Y ESTABLECER RUTA ACTUAL
     String requestedPath = server.hasArg("path") ? server.arg("path") : "/";
-
-    // Y la página actual
-    uint16_t currentPage = server.hasArg("page") 
-    ? server.arg("page").toInt() 
-    : 1;
-    if (currentPage < 1) currentPage = 1;
     
-
     // Asegurar que la ruta siempre termine con / (excepto si es solo "/")
     if (requestedPath != "/" && !requestedPath.endsWith("/")) {
         requestedPath += "/";
@@ -965,30 +942,6 @@ void handleFileManager() {
 
     currentPath = requestedPath;
     
-    // Calculamos cuantos archivos tiene la página para calcular la paginación
-    uint16_t totalFiles = 0;
-    Serial.println("Iniciamos cuenta de ficheros en directorio");
-    File countDir = SD.open(currentPath.c_str());
-    File countFile = countDir.openNextFile();
-
-    while (countFile) {
-       //  String filename = countFile.name();
-        // Solo mostrar el nombre del archivo dentro del directorio actual
-       // int lastSlash = filename.lastIndexOf('/');
-       // filename = filename.substring(lastSlash + 1); 
-        
-       // if (filename.length() > 0 && filename != ".") { totalFiles++; }
-       totalFiles++;
-        countFile.close();
-        countFile = countDir.openNextFile();
-    }
-    countDir.close();
-    Serial.printf("Fin cuenta de ficheros en directorio. total:%d \n",totalFiles);
-    uint16_t totalPages = (totalFiles + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-    if (currentPage > totalPages) currentPage = totalPages;
-    uint16_t startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    uint16_t endIndex   = startIndex + ITEMS_PER_PAGE;
-
     // Abrir el directorio actual
     File root = SD.open(currentPath.c_str());
     if (!root || !root.isDirectory()) {
@@ -1019,111 +972,50 @@ void handleFileManager() {
         server.sendContent(parentPath);
         server.sendContent(F("'>⬅️ Subir Directorio</a></div>"));
     }
-    // --- PAGINADOR ---
-    Serial.println("Pintamos paginador");
-    /*server.sendContent(F("<div style='margin-top:20px;text-align:center;'>"));
-    
-    for (uint16_t p = 1; p <= totalPages; p++) {
-
-        if (p == currentPage) {
-            server.sendContent(F("<span style='padding:8px 12px;margin:2px;"
-                                "background:#1abc9c;color:black;"
-                                "border-radius:5px;font-weight:bold;'>"));
-            server.sendContent(String(p));
-            server.sendContent(F("</span>"));
-        } else {
-            server.sendContent(F("<a style='padding:8px 12px;margin:2px;"
-                                "background:#34495e;color:white;"
-                                "border-radius:5px;text-decoration:none;' href='/file_manager?path="));
-            server.sendContent(currentPath);
-            server.sendContent(F("&page="));
-            server.sendContent(String(p));
-            server.sendContent(F("'>"));
-            server.sendContent(String(p));
-            server.sendContent(F("</a>"));
-        }
-    }
-    */
-    // Paginador flex wrap
-    server.sendContent(F("<div style='display:flex; flex-wrap:wrap; margin:5px 0;'>"));
-    for (uint16_t p = 1; p <= totalPages; p++) {
-        if (p == currentPage) {
-            server.sendContent(F("<span style='padding:8px 12px;margin:2px;"
-                                "background:#1abc9c;color:black;"
-                                "border-radius:5px;font-weight:bold;'>"));
-            server.sendContent(String(p));
-            server.sendContent(F("</span>"));
-        } else {
-            server.sendContent(F("<a style='padding:8px 12px;margin:2px;"
-                                "background:#34495e;color:white;"
-                                "border-radius:5px;text-decoration:none;' href='/file_manager?path="));
-            server.sendContent(currentPath);
-            server.sendContent(F("&page="));
-            server.sendContent(String(p));
-            server.sendContent(F("'>"));
-            server.sendContent(String(p));
-            server.sendContent(F("</a>"));
-        }
-    }
-    server.sendContent(F("</div>"));
-
-
-    server.sendContent(F("</div>"));
 
     // --- LISTADO DE ARCHIVOS ---
     server.sendContent(F("<h3>Contenido del Directorio:</h3>"));
-    Serial.println("Comenzamos a pintar los archivos");
-    uint16_t gifIndex = 0; // Controlamos que indice de fichero estamos viendo
+
     File file = root.openNextFile();
     while(file){
+        String filename = file.name();
+        // Solo mostrar el nombre del archivo dentro del directorio actual
+        int lastSlash = filename.lastIndexOf('/');
+        filename = filename.substring(lastSlash + 1); 
         
-        //if (filename.length() > 0 && filename != ".") { // Evitar "." y nombres vacíos
-            if (gifIndex >= startIndex && gifIndex < endIndex) {  // solo mostramos los archivos de la página obtenida por argumento
-                    String filename = file.name();
-                    // Solo mostrar el nombre del archivo dentro del directorio actual
-                    int lastSlash = filename.lastIndexOf('/');
-                    filename = filename.substring(lastSlash + 1); 
+        if (filename.length() > 0 && filename != ".") { // Evitar "." y nombres vacíos
+            server.sendContent(F("<div class='file-item'>"));
+            
+            if (file.isDirectory()){
+                // Enlace a la carpeta
+                server.sendContent(F("<a class='dir' href='/file_manager?path="));
+                server.sendContent(currentPath);
+                server.sendContent(filename);
+                server.sendContent(F("/'>"));
+                server.sendContent(F("📂 "));
+                server.sendContent(filename);
+                server.sendContent(F("</a>"));
 
-                    server.sendContent(F("<div class='file-item'>"));
-                    
-                    if (file.isDirectory()){
-                        // Enlace a la carpeta
-                        server.sendContent(F("<a class='dir' href='/file_manager?path="));
-                        server.sendContent(currentPath);
-                        server.sendContent(filename);
-                        server.sendContent(F("/'>"));
-                        server.sendContent(F("📂 "));
-                        server.sendContent(filename);
-                        server.sendContent(F("</a>"));
+                // Botón Borrar Directorio
+                server.sendContent(F("<button onclick='confirmDelete(\""));
+                server.sendContent(filename);
+                server.sendContent(F("\", \"dir\")'>🗑️ Borrar</button>"));
+                
+            } else {
+                // Nombre del archivo
+                server.sendContent(F("<span class='file'>"));
+                server.sendContent(F("📄 "));
+                server.sendContent(filename);
+                server.sendContent(F("</span>"));
 
-                        // Botón Borrar Directorio
-                        server.sendContent(F("<button onclick='confirmDelete(\""));
-                        server.sendContent(filename);
-                        server.sendContent(F("\", \"dir\")'>🗑️ Borrar</button>"));
-                        
-                    } else {
-                        // Nombre del archivo
-                        server.sendContent(F("<span class='file'>"));
-                        server.sendContent(F("📄 "));
-                        server.sendContent(filename);
-                        server.sendContent(F("</span>"));
-
-                        // Botón Borrar Archivo
-                        server.sendContent(F("<button onclick='confirmDelete(\""));
-                        server.sendContent(filename);
-                        server.sendContent(F("\", \"file\")'>🗑️ Borrar</button>"));
-                    }
-                    server.sendContent(F("</div>"));
+                // Botón Borrar Archivo
+                server.sendContent(F("<button onclick='confirmDelete(\""));
+                server.sendContent(filename);
+                server.sendContent(F("\", \"file\")'>🗑️ Borrar</button>"));
             }
-            gifIndex++;
-        //}
-        file.close(); // Liberar el recurso del archivo actual
-        if(gifIndex > endIndex)
-        {
-            Serial.println("Dejamos de pintar los archivos por break");
-             break; // salimos del bucle cuando ya superamos el indice final
+            server.sendContent(F("</div>"));
         }
-         Serial.println("Listado finalizado");
+        file.close(); // Liberar el recurso del archivo actual
         file = root.openNextFile(); // Pasar al siguiente archivo
     }
     root.close(); // Cerrar el directorio raíz
@@ -1594,7 +1486,7 @@ String generateCacheSignature() {
 void listarArchivosGif() {
     // 1. Generar la firma de la configuración actual de carpetas
     String currentSignature = generateCacheSignature();
-    Serial.printf("El valor de firma almacenado es %s ",currentSignature);
+    
     // Si no hay carpetas seleccionadas, la lista debe estar vacía
     if (currentSignature.length() == 0) { 
         //archivosGIF.clear(); // ya no usamos esta estructura
@@ -1603,15 +1495,6 @@ void listarArchivosGif() {
         Serial.println("No hay carpetas de GIF seleccionadas. Lista vacía.");
         return;
     }
-
-    if (currentSignature == "/GIFS:") {
-        Serial.println("La firma coincide con el valor /GIFS:");
-       // initGifOffsets(); // Borramos la lista de gif
-        Serial.println("No hay carpetas de GIF seleccionadas. Lista vacía.");
-        return;
-    }        
-
-    
 
     // 2. Intentar validar la caché leyendo el archivo de firma
     // CORRECCIÓN: Declaramos 'cacheIsValid' (era el error de compilación)
@@ -1625,7 +1508,6 @@ void listarArchivosGif() {
 
         if (savedSignature == currentSignature) {
             cacheIsValid = true;
-            Serial.printf("Firmas de caché  coinciden. savedSignature [%s]  currentSignature [%s] \n",savedSignature,currentSignature);
         } else {
             Serial.printf("Firmas de caché no coinciden. La configuración ha cambiado. savedSignature [%s]  currentSignature [%s] \n",savedSignature,currentSignature);
         }
@@ -1697,7 +1579,7 @@ void listarArchivosGif() {
         savedSignature.trim();
 
         if (savedSignature == currentSignature) {
-           Serial.printf("Firmas de caché coinciden. La configuración ha cambiado. savedSignature [%s]  currentSignature [%s] \n",savedSignature,currentSignature);
+           
         } else {
             Serial.printf("Firmas de caché no coinciden. La configuración ha cambiado. savedSignature [%s]  currentSignature [%s] \n",savedSignature,currentSignature);
         }
@@ -1779,8 +1661,6 @@ extern unsigned long lastFrameTime; // Declarar esta variable en el ámbito glob
 // extern WebServer server; // Asumiendo que el objeto server es global
 
 void ejecutarModoGif() {
-    if (numGifs==0) return;
-
     if (!display) return; 
     
     // Verificación de la SD y lista de archivos
@@ -1986,7 +1866,6 @@ void setup() {
      
     Serial.begin(115200);
     Serial.printf("--- INICIAMOS SETUP VERSION %s %s \n",FIRMWARE_VERSION,FIRMWARE_DATE);
-    logHeap("Inicio setup");
     if (!SPIFFS.begin(true)) {
         Serial.println("Error al montar SPIFFS.");
     }
@@ -2028,8 +1907,43 @@ void setup() {
     Serial.println("\nConectado a WiFi.");
     Serial.print("IP: ");
     Serial.println(WiFi.localIP());
-    logHeap("Tras WiFi");
-
+// 3. Inicialización de la Matriz LED 
+    const int FINAL_MATRIX_WIDTH = PANEL_RES_X * config.panelChain;
+    HUB75_I2S_CFG::i2s_pins pin_config = {
+        R1_PIN, G1_PIN, B1_PIN,
+        R2_PIN, G2_PIN, B2_PIN,
+        A_PIN, B_PIN, C_PIN, D_PIN, E_PIN,
+        LAT_PIN, OE_PIN, CLK_PIN
+    };
+    HUB75_I2S_CFG matrix_config(
+        FINAL_MATRIX_WIDTH, 
+        MATRIX_HEIGHT,      
+        config.panelChain,  
+        pin_config          
+    );
+// La asignación de memoria (new)
+    display = new MatrixPanel_I2S_DMA(matrix_config);
+    if (display) { 
+        display->begin();
+        display->setBrightness8(config.brightness);
+        display->fillScreen(display->color565(0, 0, 0));
+// Mostrar estado inicial
+        if (!sdMontada) {
+            mostrarMensaje("SD Error!", display->color565(255, 0, 0));
+        } else if (WiFi.status() == WL_CONNECTED) {
+            mostrarMensaje("WiFi OK!", display->color565(0, 255, 0));
+        } else {
+             mostrarMensaje("AP Mode", display->color565(255, 255, 0));
+        }
+        
+        if (config.playMode == 0) {
+            listarArchivosGif();
+        }
+        delay(1000);
+    } else {
+        Serial.println("ERROR: No se pudo asignar memoria para la matriz LED.");
+    }
+    
     // 4. Configurar Hora y Servidor Web
     initTime();
     
@@ -2060,56 +1974,7 @@ void setup() {
 
     server.begin();
     Serial.println("Servidor HTTP iniciado.");
-    logHeap("Tras server.begin()");
-
-// 3. Inicialización de la Matriz LED 
-    const int FINAL_MATRIX_WIDTH = PANEL_RES_X * config.panelChain;
-    HUB75_I2S_CFG::i2s_pins pin_config = {
-        R1_PIN, G1_PIN, B1_PIN,
-        R2_PIN, G2_PIN, B2_PIN,
-        A_PIN, B_PIN, C_PIN, D_PIN, E_PIN,
-        LAT_PIN, OE_PIN, CLK_PIN
-    };
-    HUB75_I2S_CFG matrix_config(
-        FINAL_MATRIX_WIDTH, 
-        MATRIX_HEIGHT,      
-        config.panelChain,  
-        pin_config          
-    );
-// La asignación de memoria (new)
-    display = new MatrixPanel_I2S_DMA(matrix_config);
-    if (display) { 
-        display->begin();
-        display->setBrightness8(config.brightness);
-        display->fillScreen(display->color565(0, 0, 0));
-// Mostrar estado inicial
-        if (!sdMontada) {
-            mostrarMensaje("SD Error!", display->color565(255, 0, 0));
-        } else if (WiFi.status() == WL_CONNECTED) {
-            mostrarMensaje("WiFi OK!", display->color565(0, 255, 0));
-        } else {
-             mostrarMensaje("AP Mode", display->color565(255, 255, 0));
-        }
-        // Aqui podria mostrar la ip de conexion unos segundos y luego continuar
-        String ipStr = WiFi.localIP().toString();
-        mostrarMensaje(ipStr.c_str(), display->color565(255, 255, 0));
-        
-        delay(1000);
-        mostrarMensaje("Iniciando sistema..", display->color565(255, 255, 0));
-        delay(1000);
-
-        if (config.playMode == 0) {
-            logHeap("Antes buildGifIndexFixedArray");
-            listarArchivosGif();
-            logHeap("Después buildGifIndexFixedArray");
-        }
-        delay(1000);
-    } else {
-        Serial.println("ERROR: No se pudo asignar memoria para la matriz LED.");
-    }
-
     Serial.printf("--- FIN SETUP VERSION %s %s \n",FIRMWARE_VERSION,FIRMWARE_DATE);
-
 }
 
 void loop() {
