@@ -5,3 +5,4 @@
 void loadConfig(); 
 void savePlaybackConfig();
 void saveSystemConfig(); 
+void printPreferencesInfo();

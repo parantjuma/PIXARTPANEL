@@ -240,37 +240,7 @@ String getGifPathByIndex(uint32_t index)
     Serial.println("[GIF CACHE] ERROR: No se encontró ningún GIF válido en la caché");
     return "";
 }
-/*String getGifPathByIndex(uint32_t index) {
-
-    if (index >= numGifs || !gifOffsets) return "";
-
-    uint32_t block = index / GIF_OFFSETS_BLOCK_SIZE;
-    uint32_t offsetInBlock = index % GIF_OFFSETS_BLOCK_SIZE;
-
-    // Para el caso de gif añadidos posteriormente al fichero cache subiendo nuevos gif
-    // no existirá offset para nuevos bloques, para estos casos se suman mas saltos en offsetInBlock 
-    if (block > (numOffsetBlocks-1))
-    {
-        offsetInBlock+= (block-(numOffsetBlocks-1))*GIF_OFFSETS_BLOCK_SIZE; // BLOQUES NO CONTEMPLADOS SE SALTAN EN BUCLE LINEA A LINEA
-        block=(numOffsetBlocks-1);
-    }
-     
-
-    File file = SD.open(GIF_CACHE_FILE);
-    if (!file) return "";
-
-    file.seek(gifOffsets[block]);
-
-    String line;
-    for (uint32_t i = 0; i <= offsetInBlock; i++) {
-        line = file.readStringUntil('\n');
-    }
-
-    file.close();
-
-    return line;
-}
-*/
+ 
 // Verifica si ya esta cargado el indice de offsets
 // ----------------------------------------------------------------------------------------------------
 bool isInitGifOffsets(){
@@ -382,13 +352,29 @@ void scanFolders(String basePath) {
 // ====================================================================
 //                 GESTIÓN DE ARCHIVOS GIF & CACHÉ 
 // ====================================================================
- 
+bool isUnderBasePath(const String& path) {
+    if (!path.startsWith(GIFS_BASE_PATH)) return false;
+
+    if (path.length() == strlen(GIFS_BASE_PATH)) return true;
+
+    return path.charAt(strlen(GIFS_BASE_PATH)) == '/';
+}
 
 // Función recursiva que escanea una ruta en busca de GIFs
 // Añade en el archivo GIF_CACHE_FILE los gif que localiza
 // ----------------------------------------------------------------------------------------------------
 void scanGifDirectory(const String& path, File& cacheFile) {   
-    Serial.printf("scanGifDirectory iniciado en path %s \n",path.c_str());
+    Serial.printf("scanGifDirectory iniciado en path [%s] \n",path.c_str());
+    //  Validación de ámbito
+    if (!isUnderBasePath(path)) {
+        Serial.printf(
+            "ERROR: El path [%s] no cuelga de GIFS_BASE_PATH [%s]\n",
+            path.c_str(),
+            GIFS_BASE_PATH
+        );
+        return;
+    }
+
     File root = SD.open(path);
     if (!root || !root.isDirectory()) {  // Verificamos que ademas de existir la ruta esta sea un directorio
         Serial.printf("Error al abrir directorio: %s\n", path.c_str());
@@ -439,47 +425,17 @@ void scanGifDirectory(const String& path, File& cacheFile) {
 
     root.close();
 }
-/*
-void scanGifDirectory(const String& path, File& cacheFile) {   
-    Serial.println("scanGifDirectory iniciado en path %s ",path);
-    File root = SD.open(path);
-    if (!root || !root.isDirectory()) {  // Verificamos que ademas de existir la ruta esta sea un directorio
-        Serial.printf("Error al abrir directorio: %s\n", path.c_str());
-        return;
-    }
-    File entry;
-    int cont=0;
-    
-    while (true) {
-        entry = root.openNextFile();
-        if (!entry) break;
-
-        if (!entry.isDirectory()) {
-            // Si es un directorio, lo ignoramos para la lista plana de archivos
-            // Si en el futuro quiere escanear recursivamente, esta es la línea a cambiar.
-
-            String fileName = entry.name();
-            if (fileName.endsWith(".gif") || fileName.endsWith(".GIF")) {
-
-                String fullPath;
-                if (path == "/") {
-                    fullPath = "/" + fileName;
-                } else {
-                    fullPath = path + "/" + fileName;
-                }
-                //archivosGIF.push_back(fullPath);  Dejamos de usar cachefile
-                cacheFile.println(fullPath);
-                cont++;
-                Serial.printf("[%d] - %s\n", cont, fullPath.c_str());
-
-            }
+// Verifica si currentPath forma parte de las config.activeFolders
+// ----------------------------------------------------------------------------------------------------
+bool isActiveFolder(const String& currentPath) {
+    for (const auto& folder : config.activeFolders) {
+        if (folder == currentPath) {
+            return true;
         }
-        entry.close();  // 🔴 IMPRESCINDIBLE
     }
-    Serial.println("fin scanGifDirectory ........");
+    return false;
+}
 
-    root.close();
-}*/
 // Añade un nuevo archivo subido desde el servidorvoid addNewGifInCacheFile(uploadPath.c_str());
 // ----------------------------------------------------------------------------------------------------
 void addNewGifInCacheFile(const char* uploadPath)
@@ -540,18 +496,18 @@ String generateCacheSignature() {
 void listarArchivosGif() {
     // 1. Generar la firma de la configuración actual de carpetas
     String currentSignature = generateCacheSignature();
-    Serial.printf("El valor de firma almacenado es %s ",currentSignature);
+    Serial.printf("El valor de firma almacenado en preferences es [%s] \n",currentSignature);
     // Si no hay carpetas seleccionadas, la lista debe estar vacía
     if (currentSignature.length() == 0) { 
         //archivosGIF.clear(); // ya no usamos esta estructura
         //deleteGifCache(); // Eliminamos la cache de gif (archivo). Pero no lo hacemos ahora mismo por desmarcamos y marcamos el mismo directorio
-        initGifOffsets(); // Borramos la lista de gif
-        Serial.println("No hay carpetas de GIF seleccionadas. Lista vacía.");
+       // initGifOffsets(); // Borramos la lista de gif
+       // Serial.println("No hay carpetas de GIF seleccionadas. Lista vacía.");
         return;
     }
 
-    if (currentSignature == "/GIFS:") {
-        Serial.println("La firma coincide con el valor /GIFS:");
+    if ((currentSignature == "/GIFS:")||(currentSignature == "/")) {
+        Serial.println("La firma coincide con el valor /GIFS o / :");
        // initGifOffsets(); // Borramos la lista de gif
         Serial.println("No hay carpetas de GIF seleccionadas. Lista vacía.");
         return;

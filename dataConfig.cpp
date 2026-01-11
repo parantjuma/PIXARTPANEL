@@ -95,3 +95,93 @@ void saveSystemConfig() {
     preferences.end();
 // Confirma la escritura en la NVS
 }
+
+// imprime los valores de preferencias almacenadas en la sdram 
+void printPreferencesInfo() {
+
+    Serial.println();
+    Serial.println("=== PREFERENCES INFO ===");
+
+    preferences.begin(PREF_NAMESPACE, true); // SOLO LECTURA
+
+    // 1. Controles de Reproducción
+    Serial.printf("brightness: %d\n",
+                  preferences.getInt("brightness", 150));
+
+    Serial.printf("playMode: %d\n",
+                  preferences.getInt("playMode", 0));
+
+    Serial.printf("slidingText: %s\n",
+                  preferences.getString("slidingText", "NULL").c_str());
+
+    Serial.printf("textSpeed: %d\n",
+                  preferences.getInt("textSpeed", 50));
+
+    Serial.printf("gifRepeats: %d\n",
+                  preferences.getInt("gifRepeats", 1));
+
+    Serial.printf("randomMode: %s\n",
+                  preferences.getBool("randomMode", false) ? "true" : "false");
+
+    // activeFolders (string serializado)
+    String activeFoldersStr =
+        preferences.getString("activeFolders", "");
+
+    if (activeFoldersStr.length() == 0) {
+        Serial.println("activeFolders: NULL");
+    } else {
+        Serial.printf("activeFolders (raw): %s\n",
+                      activeFoldersStr.c_str());
+
+        Serial.println("activeFolders (list):");
+        int start = 0;
+        int end = activeFoldersStr.indexOf(',');
+        int idx = 0;
+
+        while (end != -1) {
+            Serial.printf("  [%d] %s\n",
+                          idx++,
+                          activeFoldersStr.substring(start, end).c_str());
+            start = end + 1;
+            end = activeFoldersStr.indexOf(',', start);
+        }
+        if (start < activeFoldersStr.length()) {
+            Serial.printf("  [%d] %s\n",
+                          idx,
+                          activeFoldersStr.substring(start).c_str());
+        }
+    }
+
+    // 2. Configuración Hora / Fecha
+    Serial.printf("timeZone: %s\n",
+                  preferences.getString("timeZone", "NULL").c_str());
+
+    Serial.printf("format24h: %s\n",
+                  preferences.getBool("format24h", true) ? "true" : "false");
+
+    // 3. Modo Reloj
+    Serial.printf("clockColor: 0x%06lX\n",
+                  preferences.getULong("clockColor", 0xFF0000));
+
+    Serial.printf("showSeconds: %s\n",
+                  preferences.getBool("showSeconds", true) ? "true" : "false");
+
+    Serial.printf("showDate: %s\n",
+                  preferences.getBool("showDate", false) ? "true" : "false");
+
+    // 4. Texto deslizante
+    Serial.printf("slidingTextColor: 0x%06lX\n",
+                  preferences.getULong("slideColor", 0x00FF00));
+
+    // 5. Hardware / Sistema
+    Serial.printf("panelChain: %d\n",
+                  preferences.getInt("panelChain", 2));
+
+    Serial.printf("deviceName: %s\n",
+                  preferences.getString("deviceName", DEVICE_NAME_DEFAULT).c_str());
+
+    preferences.end();
+
+    Serial.println("=== PREFERENCES INFO END ===");
+    Serial.println();
+}

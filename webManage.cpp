@@ -214,20 +214,33 @@ void handleFileUpload(){
             // 🛑 LÓGICA DE OPTIMIZACIÓN: Solo refrescar la lista de GIFs si el archivo subido es un GIF.
             String filename = upload.filename;
             if (filename.endsWith(".gif") || filename.endsWith(".GIF")) {
-                String uploadPath = currentPath + upload.filename;
-                addNewGifInCacheFile(uploadPath.c_str());
-                 //listarArchivosGif();  // Descartamos volver a listar los archivos gif por cada subida, seria
-                 // un proceso muy lento si hay carpetas con muchos gif.
 
-                 /*
-                 
-                        Modificamos el funcionamiento de la siguiente forma.
+                //Se verifica si currentPath es una de las rutas 
+                //almacenadas en config.activeFolders (vector)
+                // Si es asi, entonces hemos de añadir el archivo al fichero
+                // cache para que muestre el gif, caso contrario
+                // unicamente dejamos el archivo subido sin afectar a la cache 
 
-                        - Se abre el archivo  GIF_CACHE_FILE "/gif_cache.txt"
-                        - Añadimos nueva ruta de entrada uploadPath.c_str()                        
-                        - Incrementamos el numero de gif numGifs
-                 
-                 */
+                if(isActiveFolder(currentPath))
+                {
+                    String uploadPath = currentPath + upload.filename;
+                    addNewGifInCacheFile(uploadPath.c_str());
+                    //listarArchivosGif();  // Descartamos volver a listar los archivos gif por cada subida, seria
+                    // un proceso muy lento si hay carpetas con muchos gif.
+
+                    /*
+                    
+                            Modificamos el funcionamiento de la siguiente forma.
+
+                            - Se abre el archivo  GIF_CACHE_FILE "/gif_cache.txt"
+                            - Añadimos nueva ruta de entrada uploadPath.c_str()                        
+                            - Incrementamos el numero de gif numGifs
+                    
+                    */
+                }
+                server.sendHeader("Location", String("/file_manager?path=") + currentPath);
+                server.send(302, "text/plain", "Redirigiendo...");
+
             }
         } else {
             Serial.printf("Error en la subida del archivo %s: Falló la escritura o la apertura.\n", upload.filename.c_str());
@@ -426,7 +439,7 @@ void handleFileManager() {
     server.sendContent(F("</div>"));
 
 
-    server.sendContent(F("</div>"));
+    //server.sendContent(F("</div>"));
 
     // --- LISTADO DE ARCHIVOS ---
     server.sendContent(F("<h3>Contenido del Directorio:</h3>"));

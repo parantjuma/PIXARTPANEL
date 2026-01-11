@@ -14,6 +14,8 @@
 
 void setup() {
      
+    numGifs=0;  // Al incializar, el numero de gif cargados es 0
+
     Serial.begin(115200);
     Serial.printf("--- INICIAMOS SETUP VERSION %s %s \n",FIRMWARE_VERSION,FIRMWARE_DATE);
     logHeap("Inicio setup");
@@ -22,6 +24,9 @@ void setup() {
     }
 
     loadConfig();
+    printPreferencesInfo();
+    printConfigInfo();
+    
 // 1. Inicialización de la SD 
     SPI.begin(VSPI_SCLK, VSPI_MISO, VSPI_MOSI, SD_CS_PIN);
     if (!SD.begin(SD_CS_PIN)) {
@@ -189,9 +194,9 @@ void setup() {
         String ipStr = WiFi.localIP().toString();
         mostrarMensaje(ipStr.c_str(), display->color565(255, 255, 0));
         
-        delay(1000);
+        //delay(1000);
         mostrarMensaje("Iniciando sistema..", display->color565(255, 255, 0));
-        delay(1000);
+        //delay(1000);
 
         if (config.playMode == 0) {
             logHeap("Antes buildGifIndexFixedArray");
@@ -209,7 +214,7 @@ void setup() {
 
 void loop() {
     server.handleClient();
-    
+    yield(); 
     // Solo intentar ejecutar modos si el display ha sido inicializado con éxito
     if (display) { 
         switch (config.playMode) {

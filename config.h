@@ -22,7 +22,7 @@
 //                          CONSTANTES & FIRMWARE
 // ====================================================================
 #define FIRMWARE_VERSION "2.0.9.MEMOPT_PAG_1.16" // MODIFICADO: Nueva versión del firmware
-#define FIRMWARE_DATE "6_1_2026_16_10" // Fecha de la version
+#define FIRMWARE_DATE "11_1_2026_16_53" // Fecha de la version
 #define PREF_NAMESPACE "pixel_config"
 #define WIFI_DEFAULT "PixelArt Panel Wifi"  // IP 192.168.4.1
 #define DEVICE_NAME_DEFAULT "PixelArtPanel"

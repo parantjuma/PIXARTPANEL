@@ -7,14 +7,23 @@
 // --- 2. Funciones de Utilidad de Visualización ---
 void mostrarMensaje(const char* mensaje, uint16_t color = 0xF800 /* Rojo */) {
     if (!display) return;
-    display->fillScreen(0); // Negro
-    display->setTextSize(1);
-    display->setTextWrap(false);
-    display->setTextColor(color);
+    Serial.printf("mostrarMensaje [%s] \n",mensaje);
+    // Usar el color configurado para el texto deslizante
+    uint16_t colorTexto = display->color565(
+        (config.slidingTextColor >> 16) & 0xFF,
+        (config.slidingTextColor >> 8) & 0xFF,
+        config.slidingTextColor & 0xFF
+    ); 
+    display->setTextSize(1); 
+    display->setTextWrap(false); 
+    display->setTextColor(colorTexto);     
+    
+    display->fillScreen(display->color565(0, 0, 0));
     display->setCursor(0, MATRIX_HEIGHT / 2 - 4);
     display->print(mensaje);
     display->flipDMABuffer();
 }
+
 
 // ====================================================================
 //                    EJECUCION MODO GIF
