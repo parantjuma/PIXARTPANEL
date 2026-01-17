@@ -20,7 +20,7 @@ int y_offset = 0;
 uint32_t* gifOffsets = nullptr; // Array fijo de offsets al fichero cache GIF_CACHE_FILE donde obtener rutas
 size_t numOffsetBlocks=0;
 size_t numGifs = 0;             // número de elementos en el array gifOffsets
-
+bool DNSCONFIG=false;
 
 
 // Variables de modos
@@ -35,3 +35,7 @@ File FSGifFile;    // Variable global para el manejo de archivos GIF (CRÍTICA)
 Config config;
 
 std::vector<String> allFolders; // Lista de todas las carpetas
+
+bool showIPOnlyOnce=false;
+size_t showIPOnlyOnceCount=2;
+bool modoAP=false;

@@ -15,4 +15,6 @@ void ejecutarModoGif();
 void ejecutarModoTexto();
 // EJECUTA MODO RELOJ
 void ejecutarModoReloj();
+// EJECUTA MODO INFO
+void ejecutarModoInfo();
 

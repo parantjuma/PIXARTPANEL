@@ -15,6 +15,7 @@
 void setup() {
      
     numGifs=0;  // Al incializar, el numero de gif cargados es 0
+    DNSCONFIG=false;
 
     Serial.begin(115200);
     Serial.printf("--- INICIAMOS SETUP VERSION %s %s \n",FIRMWARE_VERSION,FIRMWARE_DATE);
@@ -24,9 +25,10 @@ void setup() {
     }
 
     loadConfig();
+    //config.playMode=1; // fuerzo modo texto para ver la ip
     printPreferencesInfo();
     printConfigInfo();
-    
+
 // 1. Inicialización de la SD 
     SPI.begin(VSPI_SCLK, VSPI_MISO, VSPI_MOSI, SD_CS_PIN);
     if (!SD.begin(SD_CS_PIN)) {
@@ -63,6 +65,7 @@ void setup() {
 
     wm.setHostname(config.device_name);
     WiFi.mode(WIFI_AP_STA); 
+    wm.setConfigPortalBlocking(false);  // Establece el modo wifi como no bloqueante => permite ejecutar gif con portal
     wm.setSaveConfigCallback(nullptr);  // Desactiva posible callback cuando se configura el wifi
 
     Serial.println("Intentando conectar o iniciando portal cautivo...");
@@ -70,10 +73,21 @@ void setup() {
     // Intentamos conectar como STA (conectar a un router) y devuelve true si lo logra
     // Autoconnect es bloqueante mientras el portal cautivo esta activo
     if (!wm.autoConnect(WIFI_DEFAULT)) { 
-        Serial.println("Fallo de conexión y timeout del portal. Reiniciando...");
-        delay(3000);
-        ESP.restart();
+       // Serial.println("Fallo de conexión y timeout del portal. Reiniciando...");
+       // delay(3000);
+       // ESP.restart();
+
+       // Cambiamos comportamiento, no reiniciamos, permitimos inicio del panel, y vamos ejecutando wm para que continue
+       // ejecutando el portal cautivo hasta que conecte a wifi. 
+       //
+       // Lo unico que ocurre que el servidor web será inalcanzable mientras no haya wifi.
+        Serial.println("Fallo de conexión y timeout del portal en SETUP.");
+        modoAP=true; // Dado que nos ha dado fallo la conexión wifi indicamos que estamos en modo AP
     } 
+    else
+    {
+        showIPOnlyOnce=true; // Hemos conectado con wifi y mostraremos la ip una unica vez en modo info 
+    }
 
     Serial.println("\nConectado a WiFi.");
     Serial.print("IP: ");
@@ -126,9 +140,6 @@ void setup() {
 
 
     */
-
-
-
 
     // 4. Configurar Hora y Servidor Web
     initTime();
@@ -183,26 +194,23 @@ void setup() {
         display->setBrightness8(config.brightness);
         display->fillScreen(display->color565(0, 0, 0));
 // Mostrar estado inicial
-        if (!sdMontada) {
+        Serial.println("Estatus setup...");
+        /*if (!sdMontada) {
             mostrarMensaje("SD Error!", display->color565(255, 0, 0));
         } else if (WiFi.status() == WL_CONNECTED) {
             mostrarMensaje("WiFi OK!", display->color565(0, 255, 0));
         } else {
              mostrarMensaje("AP Mode", display->color565(255, 255, 0));
-        }
+        }*/
         // Aqui podria mostrar la ip de conexion unos segundos y luego continuar
-        String ipStr = WiFi.localIP().toString();
-        mostrarMensaje(ipStr.c_str(), display->color565(255, 255, 0));
-        
-        //delay(1000);
-        mostrarMensaje("Iniciando sistema..", display->color565(255, 255, 0));
-        //delay(1000);
-
-        if (config.playMode == 0) {
+        //String ipStr = WiFi.localIP().toString();
+        //mostrarMensaje(ipStr.c_str(), display->color565(255, 255, 0));
+        //mostrarMensaje("Iniciando sistema..", display->color565(255, 255, 0));
+        //if (config.playMode == 0) {
             logHeap("Antes buildGifIndexFixedArray");
             listarArchivosGif();
             logHeap("Después buildGifIndexFixedArray");
-        }
+       // }
         delay(1000);
     } else {
         Serial.println("ERROR: No se pudo asignar memoria para la matriz LED.");
@@ -213,24 +221,60 @@ void setup() {
 }
 
 void loop() {
-    server.handleClient();
+    wm.process();   // En caso de esar activo el portal cautivo permite configurar el wifi mientras reproduce gif
+
+    // Solo ejecutamos una vez la asignación de nombre DNS
+    if (WiFi.status() == WL_CONNECTED) {
+
+        if(modoAP)
+        {
+            // Forzamos modo info para mostrar la ip configurada independientemente del modo que estuviera activo
+            config.playMode=3;
+            modoAP=false;
+
+        }
+        if(!DNSCONFIG)
+        {
+            
+            if (MDNS.begin(config.device_name)) {
+                DNSCONFIG=true;
+                Serial.println("mDNS iniciado");
+            }
+
+        }
+    }
+
+    server.handleClient();  // Ejecutamos iteracion del servidor web
     yield(); 
+
     // Solo intentar ejecutar modos si el display ha sido inicializado con éxito
     if (display) { 
-        switch (config.playMode) {
-            case 0:
-                ejecutarModoGif();
-                break;
-            case 1:
-                ejecutarModoTexto();
-                break;
-            case 2:
-                ejecutarModoReloj();
-                break;
-            default:
-                display->fillScreen(0);
-                break;
+        if(showIPOnlyOnce)
+        {
+            ejecutarModoInfo(); // Indiferentemente del modo configurado mostramos el info una pasada
         }
+        else
+        {
+            switch (config.playMode) {
+                case 0:
+                    ejecutarModoGif();
+                    break;
+                case 1:
+                    ejecutarModoTexto();
+                    break;
+                case 2:
+                    ejecutarModoReloj();
+                    break;
+                case 3: 
+                    ejecutarModoInfo();
+                    break;
+                default:
+                    display->fillScreen(0);
+                    break;
+            }
+            
+        }
+
     }
     delay(1); 
 }

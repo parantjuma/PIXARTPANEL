@@ -8,6 +8,11 @@ void loadConfig() {
     preferences.begin(PREF_NAMESPACE, true);
 // modo lectura
     
+
+    config.showLogo = preferences.getBool("showLogo", false);
+    config.logoFrecuence = preferences.getInt("logoFrecuence", 0);
+    config.batoceraLink = preferences.getBool("batoceraLink", false);
+
     config.brightness = preferences.getInt("brightness", 150);
     config.playMode = preferences.getInt("playMode", 0);
     config.slidingText = preferences.getString("slidingText", config.slidingText);
@@ -53,7 +58,11 @@ void loadConfig() {
 void savePlaybackConfig() { 
     preferences.begin(PREF_NAMESPACE, false);
 // modo escritura
-    
+
+    preferences.putBool("showLogo", config.showLogo);
+    preferences.putInt("logoFrecuence", config.logoFrecuence);
+    preferences.putBool("batoceraLink", config.batoceraLink);
+
     preferences.putInt("brightness", config.brightness);
     preferences.putInt("playMode", config.playMode);
     preferences.putString("slidingText", config.slidingText);

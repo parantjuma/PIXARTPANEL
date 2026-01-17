@@ -30,6 +30,13 @@ void handleSave() {
     if (server.hasArg("r")) config.gifRepeats = server.arg("r").toInt();
     if (server.hasArg("m")) config.randomMode = server.arg("m").toInt() == 1; // 0=Secuencial, 1=Aleatorio
 
+
+    
+    config.showLogo = (server.arg("showLogo") == "1"); 
+    if (server.hasArg("logoFrecuence")) config.logoFrecuence = server.arg("logoFrecuence").toInt();
+    config.batoceraLink = (server.arg("batoceraLink") == "1"); 
+    
+
     // Limpiar y reconstruir la lista de carpetas activas (vector)
     config.activeFolders.clear();
     for(size_t i = 0; i < server.args(); ++i) {

@@ -31,6 +31,8 @@ String webPage() {
     html += ".brightness-percent{font-size:1em;color:#3498db;}"; 
     html += ".cb label{font-weight:normal;display:block;margin:8px 0;}";
     html += ".footer{display:flex;justify-content:space-between;font-size:0.8em;color:#777;margin-top:20px;}";
+    html += ".checkbox-group{display:flex;align-items:center;margin-top:10px;}";
+    html += ".checkbox-group label{margin:0;padding-left:10px;font-weight:normal;}";
     html += "</style></head><body><div class='c'>";
 // Cabecera
     html += "<h1>Retro Pixel LED</h1><hr><form action='/save'>";
@@ -50,6 +52,7 @@ String webPage() {
     html += String("<option value='0'") + (config.playMode == 0 ? " selected" : "") + ">GIFs</option>";
     html += String("<option value='1'") + (config.playMode == 1 ? " selected" : "") + ">Texto Deslizante</option>";
     html += String("<option value='2'") + (config.playMode == 2 ? " selected" : "") + ">Reloj</option>";
+    html += String("<option value='3'") + (config.playMode == 3 ? " selected" : "") + ">Info</option>";
     html += "</select><hr>";
 // 3. CONTROLES: Texto Deslizante
     html += "<div id='textConfig' style='display:" + String(config.playMode == 1 ? "block" : "none") + ";'>";
@@ -66,6 +69,18 @@ String webPage() {
     html += String("<option value='0'") + (config.randomMode ? "" : " selected") + ">Secuencial</option>";
     html += String("<option value='1'") + (config.randomMode ? " selected" : "") + ">Aleatorio</option>";
     html += "</select><hr>";
+
+    html += "<div class='checkbox-group'>";
+    html += String("<input type='checkbox' id='showLogo' name='showLogo' value='1'") + (config.showLogo ? " checked" : "") + ">";
+    html += "<label for='sd'>Mostrar Logos</label></div>";
+
+    html += "<label>Nº GIF entre Logos</label><input type='number' name='logoFrecuence' min='0'  value='" + String(config.logoFrecuence) + "'>";
+
+    html += "<div class='checkbox-group'>";
+    html += String("<input type='checkbox' id='batoceraLink' name='batoceraLink' value='1'") + (config.batoceraLink ? " checked" : "") + ">";
+    html += "<label for='sd'>Conexión con batocera</label></div>";
+
+
     html += "<b>Carpetas disponibles:</b><div class='cb'>";
     
     if (sdMontada) {

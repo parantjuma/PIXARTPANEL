@@ -3,6 +3,7 @@
 // ====================================================================
 
 #include <WiFi.h>
+#include <ESPmDNS.h>
 #include <WebServer.h>
 #include <Preferences.h>
 #include <SPIFFS.h>
@@ -28,6 +29,7 @@
 #define DEVICE_NAME_DEFAULT "PixelArtPanel"
 #define TZ_STRING_SPAIN "CET-1CEST,M3.5.0,M10.5.0/3" // Cadena TZ por defecto segura
 #define GIFS_BASE_PATH "/pa_gifs" // Directorio base para los GIFs
+#define LOGO_BASE_PATH "/logo"    // Directorio base para los GIFs logos cuando se active el modo Logo
 #define GIF_CACHE_FILE "/pa_gif_cache.txt" // Archivo para guardar el índice de GIFs
 #define GIF_CACHE_SIG "/pa_gif_cache.sig" // Nuevo archivo de firma
 #define M5STACK_SD SD
@@ -70,6 +72,10 @@ extern AnimatedGIF gif;
 // Puntero a la Matriz 
 extern MatrixPanel_I2S_DMA* display; 
 extern File currentFile; 
+extern bool DNSCONFIG;
+extern bool showIPOnlyOnce;     // Si esta a true activa el modo info solo una pasada
+extern bool modoAP;             // True si estamos en modo AP
+extern size_t showIPOnlyOnceCount; // Establecemos el numero de veces que se muestra la ip al iniciar 
 
 // Variables de estado y reproducción
 extern bool sdMontada;
@@ -107,11 +113,15 @@ extern File FSGifFile;    // Variable global para el manejo de archivos GIF (CR�
 struct Config {
     // 1. Controles de Reproducción
     int brightness = 150;
-    int playMode = 0; // 0: GIFs, 1: Texto, 2: Reloj
+    int playMode = 0; // 0: GIFs, 1: Texto, 2: Reloj 3:Info (ip)
     String slidingText = "Retro Pixel LED v" + String(FIRMWARE_VERSION);
     int textSpeed = 50;
     int gifRepeats = 1;
     bool randomMode = false;
+    bool showLogo = false;      // Obtiene (si lo hay) un logo de la carpeta /logo
+    bool logoFrecuence = 0;     // Si showLogo=true Numero de gif aleatorios hasta que se vuelva a mostrar un logo, 
+                                // si es 0 solo se mostrarán los logos sin ningun gif aleatorio de la coleccion.
+    bool batoceraLink = false;  // Permite dar prioridad a los gif de Batocera sobre los gif aleatorios cuando hay uno activo
     // activeFolders (vector) para uso en runtime, activeFolders_str para Preferences
     std::vector<String> activeFolders; 
     String activeFolders_str = "/GIFS";
