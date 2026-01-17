@@ -1,5 +1,8 @@
 // ====================================================================
 //                            PIXART PANEL 
+//
+//  Basado en https://github.com/fjgordillo86/RetroPixelLED v 2.0.9
+//
 // ====================================================================
 
 #include <WiFi.h>
@@ -22,8 +25,8 @@
 // ====================================================================
 //                          CONSTANTES & FIRMWARE
 // ====================================================================
-#define FIRMWARE_VERSION "2.0.9.MEMOPT_PAG_1.16" // MODIFICADO: Nueva versión del firmware
-#define FIRMWARE_DATE "11_1_2026_16_53" // Fecha de la version
+#define FIRMWARE_VERSION "1.0 Beta " // MODIFICADO: Nueva versión del firmware
+#define FIRMWARE_DATE "17_01_2026_20_42" // Fecha de la version
 #define PREF_NAMESPACE "pixel_config"
 #define WIFI_DEFAULT "PixelArt Panel Wifi"  // IP 192.168.4.1
 #define DEVICE_NAME_DEFAULT "PixelArtPanel"
