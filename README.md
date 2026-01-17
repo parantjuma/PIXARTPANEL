@@ -6,6 +6,18 @@
 
 Permite a los usuarios cambiar el **modo de reproducción** (GIFs, Texto Deslizante o Reloj), ajustar el brillo, y modificar la configuración del sistema de manera inalámbrica (OTA). Es ideal para crear pantallas decorativas de estilo retro, relojes digitales, y visualizadores de información personalizables.
 
+#  Modificaciones
+
+1.0 Beta (17_01_2026)
+---------------------
+
+- Fragmentación del archivo .ino en varios archivos .h y .cpp
+- Adaptación el modelo de cache para el acceso a la coleccion de gif. Debido a las dificultades   de la ESP32 para almacenar en memoria TADS para un gran volumen de rutas de gif en la SD (p.ej 11k entrdas de rutas gif) y evitar problemas de fragmentación de memoria. El modelo actual utiliza una cache de offsets sobre el fichero cache de gif.
+- Establecer el modo Portal Cautivo no bloqueante, de forma que si el panel se mueve de ubicación
+y pierde la conexión con la wifi configurada el panel continua con su ultima configuración en pantalla (mostrar gif, texto deslizante, hora)
+- Acceso por medio de http://pixelartpanel.local/ en vez de por IP (en fase de pruebas)
+- Mostrar información de IP en primer acceso en caso de tener WIFI configurada y conexion con exito.
+- Se añade el Modo Info: Muestra por el panel una serie de datos como ip, url local de acceso
 
 ## Agradecimientos
 

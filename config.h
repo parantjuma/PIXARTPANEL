@@ -117,7 +117,7 @@ struct Config {
     // 1. Controles de Reproducción
     int brightness = 150;
     int playMode = 0; // 0: GIFs, 1: Texto, 2: Reloj 3:Info (ip)
-    String slidingText = "Retro Pixel LED v" + String(FIRMWARE_VERSION);
+    String slidingText = "PIXART PANEL v" + String(FIRMWARE_VERSION);
     int textSpeed = 50;
     int gifRepeats = 1;
     bool randomMode = false;
