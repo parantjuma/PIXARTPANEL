@@ -114,7 +114,7 @@ String webPage() {
     html += "</form>";
     // Pie de página: Intercambio de posiciones
     html += "<div class='footer'>";
-    html += "<span style='font-size:8'>Based on Project Retro Pixel LED </span>";
+    html += "<span style='font-size:8'>Based on project Retro Pixel LED v2.0.9</span>";
     // Ahora a la Izquierda
     html += "<span><b>IP:</b> " + WiFi.localIP().toString() + "</span>";
 // Ahora a la Derecha
@@ -241,7 +241,7 @@ String configPage() {
 
     // Pie de página
     html += "<div class='footer'>";
-    html += "<span style='font-size:8'>Based on project Retro Pixel LED</span>"; 
+    html += "<span style='font-size:8'>Based on project Retro Pixel LED v2.0.9</span>"; 
     html += "<span><b>IP:</b> " + WiFi.localIP().toString() + "</span>";
     html += "</div>";
     
