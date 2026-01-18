@@ -44,3 +44,10 @@ String generateCacheSignature();
 void listarArchivosGif();
 // VAlida si el path esta dentro de la carpeta GIF definida
 bool isUnderBasePath(const String& path);
+
+// ====================================================================
+//                      CARGA DE LOGOS DESDE SD
+// ====================================================================
+
+// Carga en el vector global `gifLogos` todas las rutas .gif/.GIF dentro de /logos
+void loadLogoGifsFromSD(const String& logosBasePath = LOGOS_BASE_PATH);

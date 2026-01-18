@@ -38,6 +38,8 @@ void setup() {
     } else {
         Serial.println("Tarjeta SD montada correctamente.");
         sdMontada = true;
+        // Cargamos la lista de logos (si existen) desde /logos
+        loadLogoGifsFromSD();
         scanFolders(GIFS_BASE_PATH);
 // Escanear carpetas para la UI
     }

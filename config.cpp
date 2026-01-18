@@ -11,7 +11,8 @@ File currentFile;
 
 // Variables de estado y reproducción
 bool sdMontada = false;
-std::vector<String> archivosGIF;     // ELIMINAR!! tras optimizacion codigo
+//std::vector<String> archivosGIF;     // ELIMINAR!! tras optimizacion codigo
+std::vector<String> gifLogos;        // Rutas de GIFs dentro de /logos (se carga en setup)
 int currentGifIndex = 0; 
 int x_offset = 0; // Offset para centrado GIF
 int y_offset = 0;

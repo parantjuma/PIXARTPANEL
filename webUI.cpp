@@ -10,7 +10,7 @@
 String webPage() {
     int brightnessPercent = (int)(((float)config.brightness / 255.0) * 100.0); 
 
-    String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Retro Pixel LED</title>";
+    String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>"+PRJ_NAME_DEFAULT+"</title>";
     html += "<style>";
     html += "body{font-family:Arial;background:#f0f2f5;color:#333;margin:0;padding:20px;}";
     html += ".c{max-width:600px;margin:auto;background:#fff;padding:25px;border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,.15);}";
@@ -35,7 +35,7 @@ String webPage() {
     html += ".checkbox-group label{margin:0;padding-left:10px;font-weight:normal;}";
     html += "</style></head><body><div class='c'>";
 // Cabecera
-    html += "<h1>Retro Pixel LED</h1><hr><form action='/save'>";
+    html += "<h1>"+PRJ_NAME_DEFAULT+"</h1><hr><form action='/save'>";
 // 1. CONTROL DE BRILLO (Layout Modificado)
     html += "<label class='label-brightness'>";
     html += "Nivel de Brillo ";
@@ -114,7 +114,7 @@ String webPage() {
     html += "</form>";
     // Pie de página: Intercambio de posiciones
     html += "<div class='footer'>";
-    html += "<span>Retro Pixel LED v" + String(FIRMWARE_VERSION) + " by fjgordillo86</span>";
+    html += "<span style='font-size:8'>Based on Project Retro Pixel LED </span>";
     // Ahora a la Izquierda
     html += "<span><b>IP:</b> " + WiFi.localIP().toString() + "</span>";
 // Ahora a la Derecha
@@ -148,7 +148,7 @@ String configPage() {
     char hexTextColor[8];
     sprintf(hexTextColor, "#%06X", config.slidingTextColor); 
 
-    String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Configuración | Retro Pixel LED</title>";
+    String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Configuración | "+PRJ_NAME_DEFAULT+"</title>";
     html += "<style>";
     html += "body{font-family:Arial;background:#f0f2f5;color:#333;margin:0;padding:20px;}";
     html += ".c{max-width:600px;margin:auto;background:#fff;padding:25px;border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,.15);}";
@@ -241,89 +241,10 @@ String configPage() {
 
     // Pie de página
     html += "<div class='footer'>";
-    html += "<span>Retro Pixel LED v" + String(FIRMWARE_VERSION) + " by fjgordillo86</span>"; 
+    html += "<span style='font-size:8'>Based on project Retro Pixel LED</span>"; 
     html += "<span><b>IP:</b> " + WiFi.localIP().toString() + "</span>";
     html += "</div>";
     
     html += "</div></body></html>";
     return html;
 }
-
-
-
-// ====================================================================
-//                      INTERFAZ WEB FILE MANAGER
-// ====================================================================
-// ESTA FUNCION CREO QUE DEJA DE USARSE  
-/*
-String fileManagerPage() {
-    String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Gestor de Archivos SD</title>";
-    html += "<style>";
-    html += "body{font-family:Arial;background:#f0f2f5;color:#333;margin:0;padding:20px;}";
-    html += ".c{max-width:600px;margin:auto;background:#fff;padding:25px;border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,.15);}";
-    html += "h1{text-align:center;color:#2c3e50;margin:0;}";
-    html += "h2{border-bottom:2px solid #ccc;padding-bottom:5px;margin-top:30px;color:#3498db;}";
-    html += "input[type='file'], button, .back-btn{margin:10px 0;padding:12px;border-radius:8px;border:1px solid #ccc;width:100%;box-sizing:border-box;font-size:16px;cursor:pointer;}";
-    html += ".upload-btn{background:#2ecc71;color:#fff;border:none;}";
-    html += ".back-btn{background:#e67e22;color:#fff;border:none;}";
-    html += "table{width:100%;border-collapse:collapse;margin-top:20px;}";
-    html += "th, td{padding:10px;border:1px solid #eee;text-align:left;}";
-    html += "th{background:#f4f4f4;}";
-    html += ".delete-btn{background:#e74c3c;color:#fff;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;}";
-    html += ".footer{font-size:0.8em;color:#777;margin-top:20px;}";
-    html += "</style></head><body><div class='c'>";
-    
-    html += "<h1>Gestor de Archivos SD</h1><hr>";
-
-    // SECCIÓN DE SUBIDA
-    html += "<h2>Subir Nuevo Archivo</h2>";
-    if (sdMontada) {
-        html += "<form method='POST' action='/upload' enctype='multipart/form-data'>";
-        html += "<input type='file' name='data_file' required>";
-        html += "<button type='submit' class='upload-btn'>Subir Archivo a SD</button>";
-        html += "</form>";
-    } else {
-        html += "<p style='color:red;'>⚠️ **Error:** La tarjeta SD no está montada. No es posible subir archivos.</p>";
-    }
-    html += "<hr>";
-
-    // SECCIÓN DE LISTADO Y ELIMINACIÓN
-    html += "<h2>Archivos en la Raíz de la SD</h2>";
-    if (sdMontada) {
-        html += "<table><tr><th>Nombre de Archivo</th><th>Tamaño (KB)</th><th>Acción</th></tr>";
-        
-        File root = SD.open("/");
-        if (root) {
-            File entry = root.openNextFile();
-            while (entry) {
-                if (!entry.isDirectory()) {
-                    String fileName = entry.name();
-                    long fileSize = entry.size();
-                    
-                    html += "<tr>";
-                    html += "<td>" + fileName + "</td>";
-                    html += "<td>" + String(fileSize / 1024.0, 2) + "</td>";
-                    // Botón de eliminar con confirmación JS
-                    html += "<td><button class='delete-btn' onclick=\"if(confirm('¿Estás seguro de que quieres eliminar " + fileName + "?')) { window.location.href='/delete?name=" + fileName + "'; }\">Eliminar</button></td>";
-                    html += "</tr>";
-                }
-                entry.close();
-                entry = root.openNextFile();
-            }
-            root.close();
-        } else {
-            html += "<tr><td colspan='3'>Error al abrir la carpeta raíz de la SD.</td></tr>";
-        }
-        
-        html += "</table>";
-    } else {
-        html += "<p style='color:red;'>No se pueden listar archivos. La tarjeta SD no está disponible.</p>";
-    }
-
-    // Pie
-    html += "<hr><button type='button' class='back-btn' onclick=\"window.location.href='/'\">Volver a la Configuración Principal</button>";
-    html += "<div class='footer'>Retro Pixel LED v" + String(FIRMWARE_VERSION) + "</div>";
-    html += "</div></body></html>";
-    return html;
-}
-*/

@@ -34,6 +34,16 @@ Permite a los usuarios cambiar el **modo de reproducción** (GIFs, texto desliza
   El gestor de archivos incorpora paginación en carpetas de gran tamaño para evitar la generación de páginas web excesivamente grandes.  
   No obstante, queda pendiente su optimización, ya que el acceso a ficheros sigue siendo lento y el primer sondeo de la carpeta (lectura secuencial para contar archivos) constituye un cuello de botella.
 
+- **Logos especiales**: Se ga añadudi la posibilidad de definir una carpeta de **logos especiales** que contenga GIFs representativos del panel (por ejemplo, el nombre de una máquina arcade).  
+  El modo GIF se adaptará para alternar estos logos cada *X* GIFs de la colección, generando secuencias del tipo:  
+  `LOGO → GIF → GIF → GIF → … → LOGO → GIF → GIF → GIF`,  
+  asegurando así la visualización periódica del logo preferido.
+  Para ello en el modo de reproducción GIF se añaden 2 parámetros mas:
+      - Mostrar logos: Un check que activa el modo Logo
+      - Nº de gifs entre logos: Indica cuantos logos se muestran de la colección seleccionada hasta el proximo logo de la carpeta de logos especiales.
+
+  Estos logos especiales se encuentran en la carpeta "\logos"
+
 ## 🚀 Mejoras futuras
 
 - Optimizar la paginación en el acceso a carpetas con un gran volumen de archivos. El acceso a la SD en directorios con muchos ficheros es excesivamente lento (puede llegar a tardar hasta 1 hora en carpetas con 3.000 archivos).  
@@ -45,11 +55,6 @@ Permite a los usuarios cambiar el **modo de reproducción** (GIFs, texto desliza
   - Mostrar información de la firma de la caché actual.
   - Mostrar el número de GIFs aleatorios cacheados.
 
-- Añadir la posibilidad de definir una carpeta de **logos especiales** que contenga GIFs representativos del panel (por ejemplo, el nombre de una máquina arcade).  
-  El modo GIF se adaptará para alternar estos logos cada *X* GIFs de la colección, generando secuencias del tipo:  
-  `LOGO → GIF → GIF → GIF → … → LOGO → GIF → GIF → GIF`,  
-  asegurando así la visualización periódica del logo preferido.
-
 - Implementar conectividad con **Batocera**, basándose en los desarrollos de Retro Pixel LED de **fjgordillo86**.  
   Además, se analizará la posibilidad de que Batocera envíe un PNG reducido vía POST a la ESP32 con la imagen scrapeada del juego. Esto evitaría la necesidad de disponer de una colección completa de GIFs, aprovechando las imágenes ya incluidas en los packs de Batocera.  
   El reescalado debería realizarse en Batocera teniendo en cuenta las dimensiones de 128x64. Idealmente, la imagen se ajustaría a una dimensión y el panel mostraría el contenido mediante scroll horizontal o vertical.
@@ -57,6 +62,8 @@ Permite a los usuarios cambiar el **modo de reproducción** (GIFs, texto desliza
 - **Sincronización con el botón de apagado de la arcade**:  
   El panel deberá sincronizarse con otra ESP32 instalada en la máquina arcade, encargada de gestionar el apagado de los componentes y el modo *standby* mediante relés.  
   Esta ESP32 se conectará con PIXELARTPANEL para activar un modo reloj con bajo brillo cuando la arcade esté apagada y restaurar el último modo configurado cuando la arcade se inicie.
+
+- **Mejora en proceso de creacion de archivo cache de rutas a coleccion de gif**: Cuando seleccionamos nuevas carpetas gif, en el monitor serie puede verse el progreso, pero si gestionamos desde la web no sabemos que esta ocurriendo ya que la ESP se queda completamente ocupada escaneando la SD y creando el fichero cache. Una posible mejora a este proceso seria mostrar algun tipo de mensaje por medio del servidor web cuando estamos ejecutando algun tipo de tarea pesada como esta. De esta forma sabemos que no hemos de apagar la ESP y que no se ha quedado bloqueado el sistema. Por ejemplo podriamos tener un dato sobre el número total de gif escaneados. Para hacer esta mejora tenemos que ejecutar una iteración del servidor web dentro del bucle de escaneo de la ESP, ademas de mostrar por web algun tipo de mensaje al guardar la configuracion.
 
 ## 🙏 Agradecimientos
 

@@ -51,8 +51,32 @@ void ejecutarModoGif() {
         if (isGifOffsetEmpty()) return;
     }
     
-    //String gifPath = archivosGIF[currentGifIndex]; 
-    String gifPath = getGifPathByIndex(currentGifIndex); 
+    // --- Inserción de logos entre GIFs ---
+    // Reglas:
+    //  - Si config.showLogo=true y hay logos en SD (/logos), se intercalan.
+    //  - config.logoFrecuence indica cuántos GIFs "normales" se muestran entre logo y logo.
+    //  - Si logoFrecuence==0 => solo logos (no consume ni avanza la colección cacheada).
+    static uint32_t gifsSinceLogo = 0;
+    static size_t logoIndex = 0;
+    bool playingLogo = false;
+
+    String gifPath;
+
+    if (config.showLogo && !gifLogos.empty()) {
+        if (config.logoFrecuence <= 0) {
+            // Solo logos
+            playingLogo = true;
+        } else if (gifsSinceLogo >= (uint32_t)config.logoFrecuence) {
+            // Toca logo
+            playingLogo = true;
+        }
+    }
+
+    if (playingLogo) {
+        gifPath = gifLogos[logoIndex % gifLogos.size()];
+    } else {
+        gifPath = getGifPathByIndex(currentGifIndex);
+    }
     
     // Bucle de repetición del GIF (config.gifRepeats)
     for (int rep = 0; rep < config.gifRepeats; ++rep) { 
@@ -81,10 +105,12 @@ void ejecutarModoGif() {
                 
                 // Manejo de WebServer y espera no bloqueante
                 server.handleClient(); 
+                wm.process();   // En caso de esar activo el portal cautivo permite configurar el wifi mientras reproduce gif
                 
                 unsigned long targetTime = millis() + delayMs;
                 while (millis() < targetTime) {
                     server.handleClient(); 
+                    wm.process();   // En caso de esar activo el portal cautivo permite configurar el wifi mientras reproduce gif
                     yield(); 
                 }
                 
@@ -100,29 +126,42 @@ void ejecutarModoGif() {
             unsigned long start = millis();
             while (millis() - start < 1000) {
                  server.handleClient();
+                 wm.process();   // En caso de esar activo el portal cautivo permite configurar el wifi mientras reproduce gif
                  yield();
             }
         }
     }
     
-    if(config.randomMode)
-    {
-        // La elección de la posición del array será aleatoria entre todos los valores posibles
-        Serial.println("Selección de gif aleatorio ");
-        currentGifIndex=random(0, gifOffsetSize());
-    }
-    else
-    {
-        // Caso contrario elegimos la siguiente imagen
-        Serial.println("Selección de gif secuencial");
-        currentGifIndex++; 
-       if (currentGifIndex >= gifOffsetSize()) {
-            currentGifIndex = 0; // volver al inicio
+    // --- Selección del siguiente GIF ---
+    if (playingLogo) {
+        // Avanzamos logo pero NO consumimos el índice de la colección cacheada.
+        logoIndex = (logoIndex + 1) % gifLogos.size();
+        gifsSinceLogo = 0;
+        Serial.printf("[LOGO] Mostrado logo. Siguiente logoIndex=%d\n", (int)logoIndex);
+    } else {
+        // Hemos mostrado un GIF normal: contamos hacia el siguiente logo.
+        if (config.showLogo && !gifLogos.empty() && config.logoFrecuence > 0) {
+            gifsSinceLogo++;
         }
+
+        if(config.randomMode)
+        {
+            // La elección de la posición del array será aleatoria entre todos los valores posibles
+            Serial.println("Selección de gif aleatorio ");
+            currentGifIndex=random(0, gifOffsetSize());
+        }
+        else
+        {
+            // Caso contrario elegimos la siguiente imagen
+            Serial.println("Selección de gif secuencial");
+            currentGifIndex++; 
+           if (currentGifIndex >= gifOffsetSize()) {
+                currentGifIndex = 0; // volver al inicio
+            }
+        }
+
+        Serial.printf("Siguiente GifIndex:%d randomMode[%d] gifsSinceLogo=%d\n", currentGifIndex,config.randomMode,(int)gifsSinceLogo);
     }
-    
-    // no usa random mode?config.randomMode
-    Serial.printf("Siguiente GifIndex:%d randomMode[%d] \n", currentGifIndex,config.randomMode);
 }
 
 // ====================================================================

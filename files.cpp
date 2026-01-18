@@ -2,6 +2,57 @@
 #include "files.h"
 
 // ====================================================================
+//                      CARGA DE LOGOS DESDE SD
+// ====================================================================
+
+void loadLogoGifsFromSD(const String& logosBasePath) {
+    gifLogos.clear();
+    if (!sdMontada) {
+        Serial.println("[LOGOS] SD no montada, no se cargan logos.");
+        return;
+    }
+
+    if (!SD.exists(logosBasePath.c_str())) {
+        Serial.printf("[LOGOS] Carpeta no existe: %s\n", logosBasePath.c_str());
+        return;
+    }
+
+    File dir = SD.open(logosBasePath.c_str());
+    if (!dir || !dir.isDirectory()) {
+        Serial.printf("[LOGOS] No se pudo abrir como directorio: %s\n", logosBasePath.c_str());
+        if (dir) dir.close();
+        return;
+    }
+
+    File entry;
+    while ((entry = dir.openNextFile())) {
+        if (!entry.isDirectory()) {
+            String name = String(entry.name());
+            String lower = name;
+            lower.toLowerCase();
+            if (lower.endsWith(".gif")) {
+                // Aseguramos ruta absoluta desde el root de la SD.
+                String fullPath = logosBasePath;
+                if (!fullPath.endsWith("/")) fullPath += "/";
+                // entry.name() puede devolver ruta relativa al directorio o absoluta dependiendo de la lib;
+                // nos quedamos con el nombre de archivo.
+                int lastSlash = name.lastIndexOf('/');
+                String fileName = (lastSlash >= 0) ? name.substring(lastSlash + 1) : name;
+                fullPath += fileName;
+                gifLogos.push_back(fullPath);
+            }
+        }
+        entry.close();
+    }
+    dir.close();
+
+    // Orden estable para que el ciclo sea predecible.
+    std::sort(gifLogos.begin(), gifLogos.end());
+
+    Serial.printf("[LOGOS] Cargados %d logos desde %s\n", (int)gifLogos.size(), logosBasePath.c_str());
+}
+
+// ====================================================================
 //       FUNCIONES AÑADIDAS PARA OPTIMIZACIÓN EN USO MEMORIA
 // ====================================================================
 /*

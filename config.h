@@ -5,7 +5,7 @@
 //
 // ====================================================================
 
-#include <WiFi.h>
+#include <WiFi.h> 
 #include <ESPmDNS.h>
 #include <WebServer.h>
 #include <Preferences.h>
@@ -25,14 +25,17 @@
 // ====================================================================
 //                          CONSTANTES & FIRMWARE
 // ====================================================================
-#define FIRMWARE_VERSION "1.0 Beta " // MODIFICADO: Nueva versión del firmware
+#define PRJ_NAME_DEFAULT "PixelArt Panel"
+#define FIRMWARE_VERSION "1.0b" // MODIFICADO: Nueva versión del firmware
 #define FIRMWARE_DATE "17_01_2026_20_42" // Fecha de la version
 #define PREF_NAMESPACE "pixel_config"
 #define WIFI_DEFAULT "PixelArt Panel Wifi"  // IP 192.168.4.1
 #define DEVICE_NAME_DEFAULT "PixelArtPanel"
 #define TZ_STRING_SPAIN "CET-1CEST,M3.5.0,M10.5.0/3" // Cadena TZ por defecto segura
 #define GIFS_BASE_PATH "/pa_gifs" // Directorio base para los GIFs
-#define LOGO_BASE_PATH "/logo"    // Directorio base para los GIFs logos cuando se active el modo Logo
+// Directorio base para los GIFs de logos (cuando se active el modo Logo)
+// Nota: se usa /logos en la SD.
+#define LOGOS_BASE_PATH "/logos"
 #define GIF_CACHE_FILE "/pa_gif_cache.txt" // Archivo para guardar el índice de GIFs
 #define GIF_CACHE_SIG "/pa_gif_cache.sig" // Nuevo archivo de firma
 #define M5STACK_SD SD
@@ -82,7 +85,9 @@ extern size_t showIPOnlyOnceCount; // Establecemos el numero de veces que se mue
 
 // Variables de estado y reproducción
 extern bool sdMontada;
-extern std::vector<String> archivosGIF;     // ELIMINAR!! tras optimizacion codigo
+//extern std::vector<String> archivosGIF;     // ELIMINAR!! tras optimizacion codigo
+// Rutas de GIFs dentro de /logos (se carga en setup)
+extern std::vector<String> gifLogos;
 extern int currentGifIndex; 
 extern int x_offset; // Offset para centrado GIF
 extern int y_offset;
@@ -117,12 +122,12 @@ struct Config {
     // 1. Controles de Reproducción
     int brightness = 150;
     int playMode = 0; // 0: GIFs, 1: Texto, 2: Reloj 3:Info (ip)
-    String slidingText = "PIXART PANEL v" + String(FIRMWARE_VERSION);
+    String slidingText = "PIXELART PANEL v" + String(FIRMWARE_VERSION);
     int textSpeed = 50;
     int gifRepeats = 1;
     bool randomMode = false;
-    bool showLogo = false;      // Obtiene (si lo hay) un logo de la carpeta /logo
-    bool logoFrecuence = 0;     // Si showLogo=true Numero de gif aleatorios hasta que se vuelva a mostrar un logo, 
+    bool showLogo = false;      // Si está activo, inserta GIFs de /logos entre la colección
+    int logoFrecuence = 0;      // Si showLogo=true Numero de GIF de la colección entre logo y logo.
                                 // si es 0 solo se mostrarán los logos sin ningun gif aleatorio de la coleccion.
     bool batoceraLink = false;  // Permite dar prioridad a los gif de Batocera sobre los gif aleatorios cuando hay uno activo
     // activeFolders (vector) para uso en runtime, activeFolders_str para Preferences
