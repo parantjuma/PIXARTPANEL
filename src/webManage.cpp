@@ -376,11 +376,11 @@ void handleFileManager() {
 
     server.setContentLength(CONTENT_LENGTH_UNKNOWN);
     server.send(200, "text/html", "");
-    server.sendContent(F("<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>"+PRJ_NAME_DEFAULT+" - Archivos SD</title>"));
+    server.sendContent(F("<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>PixelArt Panel - Archivos SD</title>"));
     server.sendContent(F("<style>body{font-family:Arial,sans-serif;background:#2c3e50;color:#ecf0f1;margin:0;padding:20px}h1{color:#f39c12}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}.container{max-width:800px;margin:auto}.menu{margin-bottom:20px}.menu button,.menu a,.file-item button{background:#34495e;color:white;border:none;padding:10px 15px;cursor:pointer;border-radius:5px;text-decoration:none;display:inline-block;margin-right:5px}.menu button:hover,.menu a:hover,.file-item button:hover{background:#2c3e50}.file-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #34495e}.file-item:nth-child(even){background:#243647}.file-item a{flex-grow:1;margin-right:10px}.dir{color:#f1c40f}.file{color:#bdc3c7}.current-path{background:#1abc9c;padding:5px 10px;border-radius:5px;display:block;margin-bottom:15px}.upload-form,.dir-form{margin-top:20px;padding:15px;border:1px solid #3498db;border-radius:5px}.upload-form input[type=file],.dir-form input[type=text]{padding:10px;border:1px solid #34495e;border-radius:5px;margin-right:10px;background:#2c3e50;color:#ecf0f1}.dir-form input[type=submit]{margin-top:10px}</style></head><body><div class='container'>"));
         
     // --- ENCABEZADO Y NAVEGACIÓN ---
-    server.sendContent(F("<h1><a href='/'>🏠 "+PRJ_NAME_DEFAULT+"</a></h1><h2>📁 Archivos SD</h2>"));
+    server.sendContent(F("<h1><a href='/'>🏠 PixelArt Panel</a></h1><h2>📁 Archivos SD</h2>"));
     
     // Mostrar la ruta actual
     server.sendContent(F("<div class='current-path'>Ruta Actual: <strong>"));

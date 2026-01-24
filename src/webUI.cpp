@@ -10,7 +10,7 @@
 String webPage() {
     int brightnessPercent = (int)(((float)config.brightness / 255.0) * 100.0); 
 
-    String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>"+PRJ_NAME_DEFAULT+"</title>";
+    String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>PixelArt Panel</title>";
     html += "<style>";
     html += "body{font-family:Arial;background:#f0f2f5;color:#333;margin:0;padding:20px;}";
     html += ".c{max-width:600px;margin:auto;background:#fff;padding:25px;border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,.15);}";
@@ -35,7 +35,7 @@ String webPage() {
     html += ".checkbox-group label{margin:0;padding-left:10px;font-weight:normal;}";
     html += "</style></head><body><div class='c'>";
 // Cabecera
-    html += "<h1>"+PRJ_NAME_DEFAULT+"</h1><hr><form action='/save'>";
+    html += "<h1>PixelArt Panel</h1><hr><form action='/save'>";
 // 1. CONTROL DE BRILLO (Layout Modificado)
     html += "<label class='label-brightness'>";
     html += "Nivel de Brillo ";
@@ -76,12 +76,14 @@ String webPage() {
 
     html += "<label>Nº GIF entre Logos</label><input type='number' name='logoFrecuence' min='0'  value='" + String(config.logoFrecuence) + "'>";
 
+    /*
+    // habilitar la configuracion cuando se añada la programación de sincronizacion con batocera
     html += "<div class='checkbox-group'>";
     html += String("<input type='checkbox' id='batoceraLink' name='batoceraLink' value='1'") + (config.batoceraLink ? " checked" : "") + ">";
     html += "<label for='sd'>Conexión con batocera</label></div>";
-
-
-    html += "<b>Carpetas disponibles:</b><div class='cb'>";
+    */
+    
+    html += "<br><b>Carpetas disponibles:</b><div class='cb'>";
     
     if (sdMontada) {
         if (allFolders.empty()) {
@@ -148,7 +150,7 @@ String configPage() {
     char hexTextColor[8];
     sprintf(hexTextColor, "#%06X", config.slidingTextColor); 
 
-    String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Configuración | "+PRJ_NAME_DEFAULT+"</title>";
+    String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Configuración | PixelArt Panel</title>";
     html += "<style>";
     html += "body{font-family:Arial;background:#f0f2f5;color:#333;margin:0;padding:20px;}";
     html += ".c{max-width:600px;margin:auto;background:#fff;padding:25px;border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,.15);}";

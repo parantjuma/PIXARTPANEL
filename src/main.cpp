@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "config.h"         // Librerias y configuracion programa
 #include "dataConfig.h"     // Lib para guardar y recuperar configuracion 
 #include "lib.h"            // Funciones varias de sistema

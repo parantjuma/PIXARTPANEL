@@ -557,7 +557,7 @@ void listarArchivosGif() {
         return;
     }
 
-    if ((currentSignature == "/GIFS:")||(currentSignature == "/")) {
+    if ((currentSignature == "/GIFS:")||(currentSignature == "/:")) {
         Serial.println("La firma coincide con el valor /GIFS o / :");
        // initGifOffsets(); // Borramos la lista de gif
         Serial.println("No hay carpetas de GIF seleccionadas. Lista vacía.");
