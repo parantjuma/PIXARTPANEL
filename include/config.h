@@ -27,7 +27,7 @@
 // ====================================================================
 #define PRJ_NAME_DEFAULT "PixelArt Panel"
 #define FIRMWARE_VERSION "1.0b" // MODIFICADO: Nueva versión del firmware
-#define FIRMWARE_DATE "17_01_2026_20_42" // Fecha de la version
+#define FIRMWARE_DATE "24_01_2026_13_05" // Fecha de la version
 #define PREF_NAMESPACE "pixel_config"
 #define WIFI_DEFAULT "PixelArt Panel Wifi"  // IP 192.168.4.1
 #define DEVICE_NAME_DEFAULT "PixelArtPanel"
@@ -79,9 +79,10 @@ extern AnimatedGIF gif;
 extern MatrixPanel_I2S_DMA* display; 
 extern File currentFile; 
 extern bool DNSCONFIG;
-extern bool showIPOnlyOnce;     // Si esta a true activa el modo info solo una pasada
-extern bool modoAP;             // True si estamos en modo AP
-extern size_t showIPOnlyOnceCount; // Establecemos el numero de veces que se muestra la ip al iniciar 
+extern bool showInfoOnlyOnce;       // Si esta a true activa el modo info solo showInfoOnlyOnceCount veces al inicio del panel
+extern size_t showInfoOnlyOnceCount; // Establecemos el numero de veces que se muestra la ip al iniciar 
+extern bool modoAP;                  // True si estamos en modo AP
+
 
 // Variables de estado y reproducción
 extern bool sdMontada;
@@ -132,7 +133,8 @@ struct Config {
     bool batoceraLink = false;  // Permite dar prioridad a los gif de Batocera sobre los gif aleatorios cuando hay uno activo
     // activeFolders (vector) para uso en runtime, activeFolders_str para Preferences
     std::vector<String> activeFolders; 
-    String activeFolders_str = "/GIFS";
+    //String activeFolders_str = "/GIFS";
+    String activeFolders_str = "";
     // 2. Configuración de Hora/Fecha
     String timeZone = TZ_STRING_SPAIN; 
     bool format24h = true;

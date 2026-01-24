@@ -89,7 +89,7 @@ void setup() {
     } 
     else
     {
-        showIPOnlyOnce=true; // Hemos conectado con wifi y mostraremos la ip una unica vez en modo info 
+        
     }
 
     Serial.println("\nConectado a WiFi.");
@@ -190,35 +190,180 @@ void setup() {
         config.panelChain,  
         pin_config          
     );
+
+    /*
+        INFORMACION UTIL LIBRERIA mrfaptastic/ESP32 HUB75 LED MATRIX PANEL DMA Display@^3.0.11
+        ======================================================================================
+
+        I2S en modo paralelo + DMA
+
+        La librería usa el periférico I2S del ESP32 para generar un bus paralelo de alta velocidad hacia el HUB75.
+        Por tanto:
+        Hay CLK, LAT, OE, R/G/B, A/B/C/D/E
+
+        La “velocidad” que ajustas es frecuencia del reloj I2S
+        https://github.com/mrfaptastic/ESP32-HUB75-MatrixPanel-I2S-DMA
+        https://github.com/mrfaptastic/ESP32-HUB75-MatrixPanel-I2S-DMA/wiki
+
+
+
+        i2sspeed (esto es “la velocidad”)
+        ---------------------------------
+        matrix_config.i2sspeed = HUB75_I2S_CFG::HZ_20M;
+
+
+        Rangos reales (prácticos):
+
+        Valor	Comentario
+        8 MHz	Ultra estable, bajo brillo
+        10 MHz	Buen equilibrio
+        16 MHz	Muy usado
+        20 MHz	🔥 Límite práctico (calidad cableado/importante)
+
+        👉 Más no siempre es mejor
+        A partir de 20 MHz:
+
+        cables
+        longitud
+        calidad del panel
+        empiezan a provocar ruido/ghosting.
+
+
+        min_refresh_rate
+        ----------------
+        matrix_config.min_refresh_rate = 120;
+
+        Esto es CLAVE para GIFs:
+
+        < 60 → flicker visible
+        60–90 → aceptable
+        120 → perfecto
+        180 → puede penalizar color depth
+
+
+       Latch_blanking (anti-ghosting)
+       ------------------------------
+       matrix_config.latch_blanking = config.latchBlanking;
+
+        Valores típicos:
+
+        1 → rápido, más ghosting
+        2–3 → equilibrio
+        4 → paneles problemáticos
+
+        📌 Cada modelo de panel es distinto → este parámetro es oro 
+
+
+        clkphase
+        --------
+        matrix_config.clkphase = false;
+
+        Esto:
+
+        - cambia el flanco de captura
+        - reduce píxeles fantasma
+        - suele depender del panel
+        👉 Correctísimo que lo tengas configurable.
+
+
+        double_buff
+        -----------
+        matrix_config.double_buff = true;
+
+
+        Recomendación:
+        ✅ siempre ON para GIFs
+        consume más RAM
+        evita tearing
+        Tú ya lo sabes 😄        
+
+        Qué es DMA_FastRefresh?
+        -----------------------
+
+        DMA_FastRefresh no es una opción mágica, es un ejemplo avanzado incluido en la librería
+        ESP32 HUB75 LED MATRIX PANEL DMA Display
+
+        👉 Su objetivo es maximizar la tasa de refresco real del panel HUB75 usando:
+
+        I2S a alta frecuencia
+        DMA agresivo
+        reducción de trabajo por frame
+        sacrificando algunas cosas (si no tienes cuidado)
+        Es básicamente el modo “overclock consciente” de la librería.
+
+        Como forzarlo
+
+        matrix_config.i2sspeed = HUB75_I2S_CFG::HZ_16M o 20M;
+        matrix_config.min_refresh_rate = 120;
+        matrix_config.double_buff = true;
+        matrix_config.latch_blanking = 2 o 3;
+        matrix_config.clkphase = false;
+
+    */
+
+    /*
+    // --- APLICACIÓN DE AJUSTES AVANZADOS  ---  ( ajustes aplicados en Retro Pixel LED)
+    
+    // 1. Velocidad I2S (Mapeo del índice 0-3 a las constantes de la librería)
+    if (config.i2sSpeed == 0)      matrix_config.i2sspeed = HUB75_I2S_CFG::HZ_8M;
+    else if (config.i2sSpeed == 1) matrix_config.i2sspeed = HUB75_I2S_CFG::HZ_10M;
+    else if (config.i2sSpeed == 2) matrix_config.i2sspeed = HUB75_I2S_CFG::HZ_16M;
+    else if (config.i2sSpeed == 3) matrix_config.i2sspeed = HUB75_I2S_CFG::HZ_20M;
+    else matrix_config.i2sspeed = HUB75_I2S_CFG::HZ_10M;
+
+    // 2. Latch Blanking (Anti-Ghosting)
+    // El rango válido 1-4.
+    matrix_config.latch_blanking = config.latchBlanking;
+
+    // 3. Tasa de Refresco Mínima
+    // Si por error viene un 0, forzamos 60Hz.
+    if (config.minRefreshRate < 30) config.minRefreshRate = 60;
+    matrix_config.min_refresh_rate = config.minRefreshRate;
+
+    // 4. Doble Buffer (Siempre activo para GIFs)
+    //matrix_config.double_buff = true;
+
+    // 5. Sincronización
+    matrix_config.clkphase = false;
+
+    // Crear el objeto Display con la nueva configuración
+    display = new MatrixPanel_I2S_DMA(matrix_config);
+*/
+
+    matrix_config.i2sspeed = HUB75_I2S_CFG::HZ_16M;
+    //matrix_config.i2sspeed = HUB75_I2S_CFG::HZ_20M;
+    matrix_config.min_refresh_rate = 120;
+    //matrix_config.double_buff = true;  // no lo soporta este software probablemente por memoria, quizas con S3
+    matrix_config.latch_blanking = 2;
+    //matrix_config.latch_blanking = 3;
+    matrix_config.clkphase = false;    // ELIMINA PIXELES FANTASMAS
+
+    
 // La asignación de memoria (new)
     display = new MatrixPanel_I2S_DMA(matrix_config);
     if (display) { 
         display->begin();
         display->setBrightness8(config.brightness);
         display->fillScreen(display->color565(0, 0, 0));
-// Mostrar estado inicial
-        Serial.println("Estatus setup...");
-        /*if (!sdMontada) {
-            mostrarMensaje("SD Error!", display->color565(255, 0, 0));
-        } else if (WiFi.status() == WL_CONNECTED) {
-            mostrarMensaje("WiFi OK!", display->color565(0, 255, 0));
-        } else {
-             mostrarMensaje("AP Mode", display->color565(255, 255, 0));
-        }*/
-        // Aqui podria mostrar la ip de conexion unos segundos y luego continuar
-        //String ipStr = WiFi.localIP().toString();
-        //mostrarMensaje(ipStr.c_str(), display->color565(255, 255, 0));
-        //mostrarMensaje("Iniciando sistema..", display->color565(255, 255, 0));
-        //if (config.playMode == 0) {
+        // Si tenemos la DS montada activamos  el modo GIF
+        if(sdMontada)
+        {
+            // Mostrar estado inicial
+            Serial.println("Estatus setup...");
             logHeap("Antes buildGifIndexFixedArray");
             listarArchivosGif();
             logHeap("Después buildGifIndexFixedArray");
-       // }
-        delay(1000);
+            //delay(1000);
+        }
+        else
+        {
+            // Deberiamos avisar que no tenemos la SD montada
+        }
     } else {
         Serial.println("ERROR: No se pudo asignar memoria para la matriz LED.");
     }
-
+    showInfoOnlyOnce=true; // Activamos el mensaje de información de arranque 
+    xPosMarquesina = display->width(); 
     Serial.printf("--- FIN SETUP VERSION %s %s \n",FIRMWARE_VERSION,FIRMWARE_DATE);
 
 }
@@ -226,25 +371,25 @@ void setup() {
 void loop() {
     wm.process();   // En caso de esar activo el portal cautivo permite configurar el wifi mientras reproduce gif
 
-    // Solo ejecutamos una vez la asignación de nombre DNS
+    // Intentamos asignar la DNS hasta que nos de el ok en cada bucle
+    // Ademas, en caso de pasar de modo AP a modo wifi reiniciamos => TEST: verificar si al reiniciar con la wifi conectada funciona correctamente
+    // la asignacion de dominio a la
     if (WiFi.status() == WL_CONNECTED) {
-
-        if(modoAP)
-        {
-            // Forzamos modo info para mostrar la ip configurada independientemente del modo que estuviera activo
-            config.playMode=3;
-            modoAP=false;
-
-        }
         if(!DNSCONFIG)
         {
-            
             if (MDNS.begin(config.device_name)) {
                 DNSCONFIG=true;
                 Serial.println("mDNS iniciado");
+               // ESP.restart();
             }
-
         }
+        if(modoAP)
+        {
+            modoAP=false;
+            ESP.restart(); // Reiniciamos cuando pasamos de modo AP a modo wifi para comprobar si asigna dominio a la primera. 
+                           // Este reset podemos eliminarlo a futuro.
+        }
+
     }
 
     server.handleClient();  // Ejecutamos iteracion del servidor web
@@ -252,7 +397,7 @@ void loop() {
 
     // Solo intentar ejecutar modos si el display ha sido inicializado con éxito
     if (display) { 
-        if(showIPOnlyOnce)
+        if(showInfoOnlyOnce)
         {
             ejecutarModoInfo(); // Indiferentemente del modo configurado mostramos el info una pasada
         }

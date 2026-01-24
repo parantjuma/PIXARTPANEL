@@ -543,6 +543,14 @@ String generateCacheSignature() {
 // Función principal de listado de archivos GIF (usa la lógica de validación de firma)
 // Verifica la firma (comparativa de carpetas almacenadas en firma vs indicadas en configuracion
 // Si no coincide genera un nuevo fichero cache con todos los gif de las carpetas seleccionadas
+//
+//  Modificacion: 
+//
+//  Ocurre que por diversas causas la ESP se puede resetear (problemas de bateria por ejemplo) y ha llegado
+//  el caso en el que pierde la configuración que tienen en la memoria flash (NVS).
+//
+//  Por ello vamos a optar por no 
+//
 // ----------------------------------------------------------------------------------------------------
 void listarArchivosGif() {
     // 1. Generar la firma de la configuración actual de carpetas
@@ -550,16 +558,12 @@ void listarArchivosGif() {
     Serial.printf("El valor de firma almacenado en preferences es [%s] \n",currentSignature);
     // Si no hay carpetas seleccionadas, la lista debe estar vacía
     if (currentSignature.length() == 0) { 
-        //archivosGIF.clear(); // ya no usamos esta estructura
-        //deleteGifCache(); // Eliminamos la cache de gif (archivo). Pero no lo hacemos ahora mismo por desmarcamos y marcamos el mismo directorio
-       // initGifOffsets(); // Borramos la lista de gif
-       // Serial.println("No hay carpetas de GIF seleccionadas. Lista vacía.");
+        Serial.println("No hay carpetas de GIF seleccionadas (lista 0). Lista vacía.");
         return;
     }
 
     if ((currentSignature == "/GIFS:")||(currentSignature == "/:")) {
         Serial.println("La firma coincide con el valor /GIFS o / :");
-       // initGifOffsets(); // Borramos la lista de gif
         Serial.println("No hay carpetas de GIF seleccionadas. Lista vacía.");
         return;
     }        

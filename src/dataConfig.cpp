@@ -20,7 +20,8 @@ void loadConfig() {
     config.gifRepeats = preferences.getInt("gifRepeats", 1);
     config.randomMode = preferences.getBool("randomMode", false);
 // 1. Cargar string serializado (compatibilidad)
-    config.activeFolders_str = preferences.getString("activeFolders", "/GIFS");
+    //config.activeFolders_str = preferences.getString("activeFolders", "/GIFS");
+    config.activeFolders_str = preferences.getString("activeFolders", "");
 // 2. Deserializar el string en el vector config.activeFolders
     config.activeFolders.clear();
     int start = 0;

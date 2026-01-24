@@ -37,6 +37,6 @@ Config config;
 
 std::vector<String> allFolders; // Lista de todas las carpetas
 
-bool showIPOnlyOnce=false;
-size_t showIPOnlyOnceCount=2;
+bool showInfoOnlyOnce=false;
+size_t showInfoOnlyOnceCount=1;
 bool modoAP=false;

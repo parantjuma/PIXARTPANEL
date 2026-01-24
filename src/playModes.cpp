@@ -190,39 +190,64 @@ void ejecutarModoTexto() {
         }
 
         display->fillScreen(display->color565(0, 0, 0));
+        Serial.printf("xPosMarquesina $d /n",xPosMarquesina);
         display->setCursor(xPosMarquesina, MATRIX_HEIGHT / 2 - 4);
         display->print(config.slidingText);
         display->flipDMABuffer(); 
     }
 }
+// ====================================================================
+//                     MUESTRA INFORMACIÓN DE SISTEMA 
+// ====================================================================
 // Muesta la ip por pantalla
 void ejecutarModoInfo() {
     if (!display) return; 
 
+    // Configuramos el texto a mostrar en el modo info
+    String infoMsg;
+    infoMsg="";
+    if(modoAP)
+    {
 
-    String infoMsg = WiFi.localIP().toString();
-    if(DNSCONFIG) infoMsg=infoMsg + " http://" + String(DEVICE_NAME_DEFAULT) + ".local ";
-    else infoMsg=infoMsg + " mDNS no iniciado "; 
+        infoMsg=infoMsg+"[AP mode] Conectar a Wifi ["+String(WIFI_DEFAULT)+"] http://192.168.4.1 ]";
+
+    }
+    else
+    {
+        infoMsg=infoMsg+"[WIFI mode] ";
+        infoMsg =infoMsg + " http://" + WiFi.localIP().toString();
+        if(DNSCONFIG) infoMsg=infoMsg + " http://" + String(DEVICE_NAME_DEFAULT) + ".local ";
+        else infoMsg=infoMsg + " [DNS no iniciado] "; 
+
+    }
+    if(!sdMontada)
+    {
+        infoMsg=infoMsg+" !!SD NO INICIADA!! ";
+
+    }
+
 
     // Usar el color configurado para el texto deslizante
-    uint16_t colorTexto = display->color565(
+    /*uint16_t colorTexto = display->color565(
         (config.slidingTextColor >> 16) & 0xFF,
         (config.slidingTextColor >> 8) & 0xFF,
         config.slidingTextColor & 0xFF
-    ); 
+    );*/ 
+    uint16_t colorTexto = display->color565(220, 112, 112);
     display->setTextSize(1); 
     display->setTextWrap(false); 
     display->setTextColor(colorTexto); 
 
-    if (millis() - lastScrollTime > config.textSpeed) {
+    //if (millis() - lastScrollTime > config.textSpeed) {
+    if (millis() - lastScrollTime > 30) {
         lastScrollTime = millis(); 
         xPosMarquesina--;
 
         int anchoTexto = infoMsg.length() * 6; 
 
         if (xPosMarquesina < -anchoTexto) {
-            showIPOnlyOnceCount--;
-            if((showIPOnlyOnce)&&(showIPOnlyOnceCount==0)) showIPOnlyOnce=false; // Desactivamos el modo forzado de una pasada de info
+            showInfoOnlyOnceCount--;
+            if((showInfoOnlyOnce)&&(showInfoOnlyOnceCount==0)) showInfoOnlyOnce=false; // Desactivamos el modo forzado de una pasada de info
             xPosMarquesina = display->width(); 
         }
 
